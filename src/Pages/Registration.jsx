@@ -1,37 +1,40 @@
-import React, { use } from "react";
+import React, { useContext } from "react";
 import { FaEye } from "react-icons/fa";
 import { Link } from "react-router";
 import { AuthContext } from "../Provider/AuthProvider";
 
 const Registration = () => {
+  const { createUser, setUser, signInWithGoogle } = useContext(AuthContext);
 
-
-    const { createUser, setUser } = use(AuthContext);
-
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-      const form = e.target;
-      const name = form.name.value;
-      const email = form.email.value;
-      const photo = form.photo.value;
-      const password = form.password.value;
+    const form = e.target;
+    const name = form.name.value;
+    const email = form.email.value;
+    const photo = form.photo.value;
+    const password = form.password.value;
 
-      console.log(name, email, photo, password);
-      createUser(email, password)
-          .then(result => {
-              const user = result.user;
-              console.log(user);
-              setUser(user)
-              
-          })
-          .catch(error => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-              alert(errorCode, errorMessage)
-      })
-      
+    try {
+      const result = await createUser(email, password, name, photo);
+      console.log("User created:", result.user);
+      alert("Account created successfully!");
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  };
 
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithGoogle();
+      setUser(result.user);
+      alert(`Welcome ${result.user.displayName || "User"}!`);
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
   };
 
   return (
@@ -40,7 +43,7 @@ const Registration = () => {
         {/* Left Section */}
         <div className="w-full md:w-1/2 p-8 sm:p-10 flex flex-col justify-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 text-center md:text-left">
-            Create account
+            Create Account
           </h2>
 
           <form onSubmit={handleRegister} className="flex flex-col space-y-4">
@@ -93,8 +96,8 @@ const Registration = () => {
             </Link>
           </p>
 
-          <div className="flex justify-center  items-center space-x-4 mt-6">
-            <button className="btn bg-white text-black border-[#e5e5e5] ">
+          <div className="flex justify-center items-center space-x-4 mt-6">
+            <button onClick={handleGoogleLogin} className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm sm:text-base">
               <svg
                 aria-label="Google logo"
                 width="16"
