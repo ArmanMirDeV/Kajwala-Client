@@ -1,8 +1,39 @@
-import React from "react";
+import React, { use } from "react";
 import { FaEye } from "react-icons/fa";
 import { Link } from "react-router";
+import { AuthContext } from "../Provider/AuthProvider";
 
 const Registration = () => {
+
+
+    const { createUser, setUser } = use(AuthContext);
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+
+      const form = e.target;
+      const name = form.name.value;
+      const email = form.email.value;
+      const photo = form.photo.value;
+      const password = form.password.value;
+
+      console.log(name, email, photo, password);
+      createUser(email, password)
+          .then(result => {
+              const user = result.user;
+              console.log(user);
+              setUser(user)
+              
+          })
+          .catch(error => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              alert(errorCode, errorMessage)
+      })
+      
+
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#c49b8c] to-[#b58474] px-4 rounded-2xl">
       <div className="bg-white shadow-lg rounded-3xl flex flex-col md:flex-row overflow-hidden w-full max-w-5xl ">
@@ -11,28 +42,33 @@ const Registration = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 text-center md:text-left">
             Create account
           </h2>
-          <p className="text-sm text-gray-500 mb-6 text-center md:text-left">
-            Let’s get started with your 30 days trial
-          </p>
 
-          <form className="flex flex-col space-y-4">
+          <form onSubmit={handleRegister} className="flex flex-col space-y-4">
             <input
+              required
+              name="name"
               type="text"
               placeholder="Name"
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#a97173]"
             />
             <input
+              required
+              name="email"
               type="email"
               placeholder="Email"
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#a97173]"
             />
             <input
+              required
+              name="photo"
               type="text"
               placeholder="Photo URL"
               className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#a97173]"
             />
             <div className="relative">
               <input
+                required
+                name="password"
                 type="password"
                 placeholder="Password"
                 className="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#a97173]"
@@ -42,14 +78,17 @@ const Registration = () => {
               </span>
             </div>
 
-            <button className="bg-[#a97173] text-white py-2 rounded-md hover:bg-[#946062] transition">
+            <button
+              type="submit"
+              className="w-full bg-rose-400 hover:bg-rose-500 text-white py-3 rounded-lg transition"
+            >
               Create account
             </button>
           </form>
 
           <p className="text-sm text-gray-500 mt-4 text-center md:text-left">
             Already have an account?{" "}
-            <Link to='/login' className="text-[#a97173] hover:underline">
+            <Link to="/login" className="text-[#a97173] hover:underline">
               Login
             </Link>
           </p>
