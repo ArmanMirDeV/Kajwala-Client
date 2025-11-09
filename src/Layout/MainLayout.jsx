@@ -1,25 +1,29 @@
+// src/Layout/MainLayout.js
 import React from "react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
-import { Outlet } from "react-router";
+import { Outlet } from "react-router"; 
 
 const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar */}
-
-      <div className="max-w-7xl ">
+      <header className="w-full">
         <Navbar />
-      </div>
+      </header>
 
       {/* Main content */}
-
-      <div>
-        <Outlet />
-      </div>
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6">
+        <div
+          className="w-full h-[calc(100vh-96px)] bg-gray-50 rounded-lg shadow-inner p-6 overflow-auto"
+          
+        >
+          <Outlet />
+        </div>
+      </main>
 
       {/* Footer */}
-      <footer>
+      <footer className="w-full">
         <Footer />
       </footer>
     </div>

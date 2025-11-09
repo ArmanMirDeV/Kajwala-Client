@@ -1,117 +1,207 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router"; 
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, ChevronDown } from "lucide-react";
+import { Link, useLocation } from "react-router";
 import logo from "../assets/logo.png";
-import {
-  FaHome,
-  FaServicestack,
-  FaClipboardList,
-  FaPlusCircle,
-  FaBook,
-  FaUser,
-  FaSignInAlt,
-  FaUserPlus,
-} from "react-icons/fa";
-
-const pages = [
-  { name: "Home", path: "/", icon: <FaHome /> },
-  { name: "Services", path: "/services", icon: <FaServicestack /> },
-  { name: "My Services", path: "/my-services", icon: <FaClipboardList /> },
-  { name: "Add Service", path: "/add-service", icon: <FaPlusCircle /> },
-  { name: "My Bookings", path: "/my-bookings", icon: <FaBook /> },
-  { name: "Profile", path: "/profile", icon: <FaUser /> },
-  { name: "Login", path: "/login", icon: <FaSignInAlt /> },
-  { name: "Register", path: "/register", icon: <FaUserPlus /> },
-];
+import { FaHome, FaServicestack, FaUser } from "react-icons/fa";
+import { FcServices } from "react-icons/fc";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+  const location = useLocation();
+
+  const desktopDropdownRef = useRef();
+  const mobileDropdownRef = useRef();
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        desktopDropdownRef.current &&
+        !desktopDropdownRef.current.contains(e.target)
+      ) {
+        setDesktopDropdownOpen(false);
+      }
+      if (
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(e.target)
+      ) {
+        setMobileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const menuItems = [
+    { name: "Home", path: "/", icon: <FaHome /> },
+    { name: "Services", path: "/services", icon: <FcServices /> },
+    { name: "My Services", path: "/my-services", icon: <FcServices /> },
+    { name: "Add Service", path: "/add-services", icon: <FcServices /> },
+    { name: "My Bookings", path: "/my-bookings", icon: <FcServices /> },
+  ];
+
+  const dropdownItems = [
+    { name: "Profile", path: "/profile" },
+    { name: "Login", path: "/login" },
+    { name: "Register", path: "/registration" },
+  ];
+
+  const renderMenuLink = (item, closeMenu) => (
+    <Link
+      key={item.name}
+      to={item.path}
+      className={`flex items-center gap-2 text-gray-700 font-medium hover:text-blue-600 transition-colors ${
+        location.pathname === item.path ? "text-blue-600 font-semibold" : ""
+      }`}
+      onClick={closeMenu}
+    >
+      {item.icon && <span>{item.icon}</span>}
+      {item.name}
+    </Link>
+  );
 
   return (
-    <nav className="bg-base-100 shadow-sm  w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <motion.img
-              src={logo}
-              alt="KajWala Logo"
-              className="w-10 h-10 rounded-full"
-              whileHover={{ scale: 1.2, rotate: 15 }}
-              whileTap={{ scale: 0.9, rotate: -10 }}
-            />
-            <span className="text-xl font-bold">KajWala</span>
-          </div>
+    <header className="bg-white shadow-md w-full">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Logo */}
+        <motion.div
+          className="flex items-center gap-2 cursor-pointer"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <img
+            src={logo}
+            alt="LocalServe Logo"
+            className="w-12 h-12 rounded-full"
+          />
+          <Link
+            to="/"
+            className="text-2xl font-bold text-blue-600 tracking-wide"
+          >
+            KajWala
+          </Link>
+        </motion.div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-2">
-            {pages.map((page) => (
-              <NavLink
-                key={page.name}
-                to={page.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-1 px-3 py-2 rounded hover:bg-gray-200 transition ${
-                    isActive ? "bg-primary text-white" : ""
-                  }`
-                }
-              >
-                {page.icon} {page.name}
-              </NavLink>
-            ))}
-          </div>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-6">
+          {menuItems.map((item) => renderMenuLink(item, () => {}))}
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center md:hidden">
+          {/* Desktop Dropdown */}
+          <div className="relative" ref={desktopDropdownRef}>
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md focus:outline-none hover:bg-gray-200 transition"
+              className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors"
+              onClick={() => setDesktopDropdownOpen(!desktopDropdownOpen)}
             >
-              <svg
-                className="block h-6 w-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d={
-                    menuOpen
-                      ? "M6 18L18 6M6 6l12 12"
-                      : "M4 6h16M4 12h16M4 18h16"
-                  }
-                />
-              </svg>
+              Account
+              <ChevronDown
+                size={18}
+                className={`transition-transform duration-200 ${
+                  desktopDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
+            <AnimatePresence>
+              {desktopDropdownOpen && (
+                <motion.ul
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-md"
+                >
+                  {dropdownItems.map((item) => (
+                    <li key={item.name}>
+                      <Link
+                        to={item.path}
+                        className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        onClick={() => setDesktopDropdownOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    </li>
+                  ))}
+                </motion.ul>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
+        </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden text-gray-700"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X size={26} /> : <Menu size={26} />}
+        </button>
       </div>
 
-      {/* Mobile Dropdown */}
-      {menuOpen && (
-        <div className="md:hidden bg-base-100 shadow-lg">
-          <ul className="flex flex-col p-2 gap-1">
-            {pages.map((page) => (
-              <li key={page.name}>
-                <NavLink
-                  to={page.path}
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-200 transition ${
-                      isActive ? "bg-primary text-white" : ""
-                    }`
-                  }
-                  onClick={() => setMenuOpen(false)}
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden bg-white shadow-inner"
+          >
+            <nav className="flex flex-col px-6 py-4 space-y-3">
+              {menuItems.map((item) =>
+                renderMenuLink(item, () => setMenuOpen(false))
+              )}
+
+              {/* Mobile Dropdown */}
+              <div
+                className="border-t border-gray-200 pt-3"
+                ref={mobileDropdownRef}
+              >
+                <button
+                  className="flex items-center justify-between w-full text-gray-700 font-medium hover:text-blue-600 transition-colors"
+                  onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
                 >
-                  {page.icon} {page.name}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </nav>
+                  Account
+                  <ChevronDown
+                    size={18}
+                    className={`transition-transform duration-200 ${
+                      mobileDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {mobileDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex flex-col mt-2 space-y-1"
+                    >
+                      {dropdownItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          to={item.path}
+                          className="block text-gray-700 px-2 py-1 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            setMobileDropdownOpen(false);
+                          }}
+                        >
+                          {item.name}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 };
 

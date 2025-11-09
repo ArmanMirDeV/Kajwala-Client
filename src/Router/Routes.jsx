@@ -27,7 +27,7 @@ const router = createBrowserRouter([
         element: <MyServices />,
       },
       {
-        path: "add-service",
+        path: "add-services",
         element: <AddServices />,
       },
       {
@@ -43,7 +43,7 @@ const router = createBrowserRouter([
         element: <LogIn />,
       },
       {
-        path: "register",
+        path: "registration",
         element: <Registration />,
       },
       {
