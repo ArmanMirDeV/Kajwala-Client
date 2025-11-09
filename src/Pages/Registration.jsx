@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { FaEye } from "react-icons/fa";
 import { Link } from "react-router";
 import { AuthContext } from "../Provider/AuthProvider";
+import toast from "react-hot-toast";
 
 const Registration = () => {
   const { createUser, setUser, signInWithGoogle } = useContext(AuthContext);
@@ -18,11 +19,11 @@ const Registration = () => {
     try {
       const result = await createUser(email, password, name, photo);
       console.log("User created:", result.user);
-      alert("Account created successfully!");
+      toast.success(" Account created successfully!");
       form.reset();
     } catch (error) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -30,16 +31,16 @@ const Registration = () => {
     try {
       const result = await signInWithGoogle();
       setUser(result.user);
-      alert(`Welcome ${result.user.displayName || "User"}!`);
+      toast.success(`Welcome ${result.user.displayName || "User"}!`);
     } catch (error) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#c49b8c] to-[#b58474] px-4 rounded-2xl">
-      <div className="bg-white shadow-lg rounded-3xl flex flex-col md:flex-row overflow-hidden w-full max-w-5xl ">
+      <div className="bg-white shadow-lg rounded-3xl flex flex-col md:flex-row overflow-hidden w-full max-w-5xl">
         {/* Left Section */}
         <div className="w-full md:w-1/2 p-8 sm:p-10 flex flex-col justify-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 text-center md:text-left">
@@ -97,7 +98,10 @@ const Registration = () => {
           </p>
 
           <div className="flex justify-center items-center space-x-4 mt-6">
-            <button onClick={handleGoogleLogin} className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm sm:text-base">
+            <button
+              onClick={handleGoogleLogin}
+              className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm sm:text-base"
+            >
               <svg
                 aria-label="Google logo"
                 width="16"

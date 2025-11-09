@@ -1,7 +1,42 @@
-import React from "react";
-import { Link } from "react-router";
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router";
+import { AuthContext } from "../Provider/AuthProvider";
+import toast from "react-hot-toast";
 
 const LogIn = () => {
+  const { signInUser, setUser, signInWithGoogle } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const email = form.email.value;
+    const password = form.password.value;
+
+    try {
+      const result = await signInUser(email, password);
+      setUser(result.user);
+      toast.success(`Welcome back, ${result.user.displayName || "User"}!`);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithGoogle();
+      setUser(result.user);
+      toast.success(`Logged in as ${result.user.displayName || "User"}!`);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-rose-100 to-rose-300 px-4">
       <div className="bg-white shadow-xl rounded-2xl flex flex-col md:flex-row max-w-4xl w-full overflow-hidden">
@@ -11,18 +46,22 @@ const LogIn = () => {
             Hello Again!
           </h2>
 
-          <form className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <input
+                name="email"
                 type="email"
                 placeholder="Email"
+                required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
               />
             </div>
             <div>
               <input
+                name="password"
                 type="password"
                 placeholder="Password"
+                required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
               />
               <div className="text-right mt-2">
@@ -38,8 +77,9 @@ const LogIn = () => {
               Sign In
             </button>
           </form>
+
           <p className="text-sm text-gray-500 mt-4 text-center md:text-left">
-            Already have an account?{" "}
+            Don’t have an account?{" "}
             <Link to="/registration" className="text-[#a97173] hover:underline">
               Register
             </Link>
@@ -48,7 +88,10 @@ const LogIn = () => {
           <div className="my-6 text-center text-gray-500">or continue with</div>
 
           <div className="flex justify-center">
-            <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm sm:text-base">
+            <button
+              onClick={handleGoogleLogin}
+              className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition text-sm sm:text-base"
+            >
               <svg
                 aria-label="Google logo"
                 width="16"

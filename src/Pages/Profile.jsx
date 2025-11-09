@@ -1,25 +1,34 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../Provider/AuthProvider";
 import { useNavigate } from "react-router";
 import { LogOut, Mail, Clock, User, Edit } from "lucide-react";
 import { updateProfile } from "firebase/auth";
+import { Toaster, toast } from "react-hot-toast";
 
 const Profile = () => {
   const { user, logOut, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user?.displayName || "");
-  const [photo, setPhoto] = useState(user?.photoURL || "");
+  const [name, setName] = useState("");
+  const [photo, setPhoto] = useState("");
+
+  // Prefill the modal inputs with current user data
+  useEffect(() => {
+    if (user) {
+      setName(user.displayName || "");
+      setPhoto(user.photoURL || "");
+    }
+  }, [user]);
 
   const handleLogOut = async () => {
     try {
       await logOut();
-      alert("You have been logged out!");
+      toast.success("You have been logged out!");
       navigate("/login");
     } catch (error) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -31,11 +40,11 @@ const Profile = () => {
         photoURL: photo,
       });
       setUser({ ...user, displayName: name, photoURL: photo });
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -51,12 +60,15 @@ const Profile = () => {
         >
           Go to Login
         </button>
+        <Toaster position="top-center" reverseOrder={false} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f6c29f] to-[#8e78c0] px-4 py-8">
+      <Toaster position="top-center" reverseOrder={false} />
+
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -98,7 +110,7 @@ const Profile = () => {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 bg-[#a97173] hover:bg-[#966463] text-white font-medium px-5 py-2 rounded-lg transition"
+            className="flex items-center gap-2 bg-[#a97173] hover:bg-[#94605f] text-white font-medium px-5 py-2 rounded-lg transition"
           >
             <Edit className="w-5 h-5" />
             Update Profile
@@ -131,9 +143,23 @@ const Profile = () => {
               transition={{ duration: 0.3 }}
               className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md"
             >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
-                Update Your Profile
-              </h2>
+              {/* Header Section */}
+              <div className="flex flex-col items-center mb-6">
+                <motion.img
+                  src={
+                    photo || user?.photoURL || "https://via.placeholder.com/100"
+                  }
+                  alt="Profile Preview"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-[#a97173] mb-3"
+                  whileHover={{ scale: 1.05 }}
+                />
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {name || user?.displayName || "Unnamed User"}
+                </h3>
+                <p className="text-sm text-gray-500">{user?.email}</p>
+              </div>
+
+              {/* Update Form */}
               <form onSubmit={handleUpdateProfile} className="space-y-4">
                 <div>
                   <label className="block text-gray-600 mb-1">Full Name</label>
