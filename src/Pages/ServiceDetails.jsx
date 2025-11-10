@@ -3,7 +3,6 @@ import { useParams } from "react-router";
 import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import Swal from "sweetalert2";
 import { AuthContext } from "../Provider/AuthProvider";
 
 const ServiceDetails = () => {
@@ -29,15 +28,35 @@ const ServiceDetails = () => {
         setLoading(false);
       }
     };
-
     fetchService();
   }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
+        Loading service details...
+      </div>
+    );
+  }
+
+  if (!service) {
+    return (
+      <div className="text-center text-gray-500 mt-10">Service not found.</div>
+    );
+  }
+
+  // Check if the logged-in user is the provider
+  const isOwner = user?.email === service.providerEmail;
 
   // Handle booking
   const handleBooking = async (e) => {
     e.preventDefault();
     if (!bookingDate) {
       toast.error("Please select a booking date.");
+      return;
+    }
+    if (isOwner) {
+      toast.error("You cannot book your own service!");
       return;
     }
 
@@ -61,24 +80,14 @@ const ServiceDetails = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
-        Loading service details...
-      </div>
-    );
-  }
-
-  if (!service) {
-    return (
-      <div className="text-center text-gray-500 mt-10">Service not found.</div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-rose-100 py-10 px-4">
       <motion.div
-        className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6"
+        className={`max-w-4xl mx-auto p-6 rounded-2xl shadow-xl ${
+          document.documentElement.getAttribute("data-theme") === "dark"
+            ? "bg-gray-800 text-white"
+            : "bg-white text-gray-800"
+        }`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -91,23 +100,31 @@ const ServiceDetails = () => {
         <h2 className="text-3xl font-bold text-rose-600 mb-3">
           {service.serviceName}
         </h2>
-        <p className="text-gray-600 mb-2">
+        <p className="mb-2">
           <span className="font-semibold">Category:</span> {service.category}
         </p>
-        <p className="text-gray-600 mb-2">
+        <p className="mb-2">
           <span className="font-semibold">Price:</span> ${service.price}
         </p>
-        <p className="text-gray-600 mb-2">
+        <p className="mb-2">
           <span className="font-semibold">Provider:</span>{" "}
           {service.providerName}
         </p>
-        <p className="text-gray-700 mb-4">{service.description}</p>
+        <p className="mb-4">{service.description}</p>
 
         <button
-          onClick={() => setBookingModalOpen(true)}
-          className="bg-rose-500 text-white px-6 py-2 rounded-lg hover:bg-rose-600 transition"
+          onClick={() => {
+            if (isOwner) toast.error("You cannot book your own service!");
+            else setBookingModalOpen(true);
+          }}
+          disabled={isOwner}
+          className={`px-6 py-2 rounded-lg text-white transition ${
+            isOwner
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-rose-500 hover:bg-rose-600"
+          }`}
         >
-          Book Now
+          {isOwner ? "Cannot Book Your Own Service" : "Book Now"}
         </button>
       </motion.div>
 
@@ -115,7 +132,11 @@ const ServiceDetails = () => {
       {bookingModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50  bg-opacity-40">
           <motion.div
-            className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md"
+            className={`w-full max-w-md p-6 rounded-2xl shadow-xl ${
+              document.documentElement.getAttribute("data-theme") === "dark"
+                ? "bg-gray-800 text-white"
+                : "bg-white text-gray-800"
+            }`}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
@@ -126,7 +147,7 @@ const ServiceDetails = () => {
 
             <form className="space-y-4" onSubmit={handleBooking}>
               <div>
-                <label className="block text-gray-700 mb-1">Your Email</label>
+                <label className="block mb-1">Your Email</label>
                 <input
                   type="email"
                   value={user.email}
@@ -134,8 +155,9 @@ const ServiceDetails = () => {
                   className="w-full px-4 py-2 border rounded-lg bg-gray-100"
                 />
               </div>
+
               <div>
-                <label className="block text-gray-700 mb-1">Service Name</label>
+                <label className="block mb-1">Service Name</label>
                 <input
                   type="text"
                   value={service.serviceName}
@@ -143,8 +165,9 @@ const ServiceDetails = () => {
                   className="w-full px-4 py-2 border rounded-lg bg-gray-100"
                 />
               </div>
+
               <div>
-                <label className="block text-gray-700 mb-1">Price</label>
+                <label className="block mb-1">Price</label>
                 <input
                   type="text"
                   value={`$${service.price}`}
@@ -152,8 +175,9 @@ const ServiceDetails = () => {
                   className="w-full px-4 py-2 border rounded-lg bg-gray-100"
                 />
               </div>
+
               <div>
-                <label className="block text-gray-700 mb-1">Booking Date</label>
+                <label className="block mb-1">Booking Date</label>
                 <input
                   type="date"
                   value={bookingDate}
