@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { AuthContext } from "../Provider/AuthProvider";
@@ -10,14 +11,23 @@ const MyServices = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch provider's services
+  // Edit modal state
+  const [editService, setEditService] = useState(null);
+  const [formData, setFormData] = useState({
+    serviceName: "",
+    category: "",
+    price: "",
+    imageUrl: "",
+  });
+
+  // Fetch services for this provider
   useEffect(() => {
     if (!user?.email) return;
 
     const fetchServices = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/services?providerEmail=${user.email}`
+          `http://localhost:3000/my-services/${user.email}`
         );
         setServices(res.data);
       } catch (err) {
@@ -31,34 +41,78 @@ const MyServices = () => {
     fetchServices();
   }, [user]);
 
-  // Handle Delete
+  // Delete service
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this service?"
-    );
-    if (!confirmDelete) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const res = await axios.delete(`http://localhost:3000/services/${id}`);
       if (res.data.deletedCount > 0) {
         setServices((prev) => prev.filter((s) => s._id !== id));
-        toast.success("Service deleted successfully!");
+        Swal.fire("Deleted!", "Service has been deleted.", "success");
       } else {
-        toast.error("Service not found or already deleted!");
+        Swal.fire("Error!", "Service not found.", "error");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete service!");
+      Swal.fire("Error!", "Failed to delete service.", "error");
     }
   };
 
-  if (loading) {
+  // Open edit modal
+  const openEditModal = (service) => {
+    setEditService(service);
+    setFormData({
+      serviceName: service.serviceName,
+      category: service.category,
+      price: service.price,
+      imageUrl: service.imageUrl,
+    });
+  };
+
+  // Close modal
+  const closeEditModal = () => setEditService(null);
+
+  // Handle input change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Submit edit
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(
+        `http://localhost:3000/services/${editService._id}`,
+        formData
+      );
+      setServices((prev) =>
+        prev.map((s) => (s._id === editService._id ? { ...s, ...formData } : s))
+      );
+      toast.success("Service updated successfully!");
+      closeEditModal();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update service!");
+    }
+  };
+
+  if (loading)
     return (
       <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
-        Loading your services...
+        Loading services...
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-rose-100 py-10 px-4">
@@ -109,21 +163,18 @@ const MyServices = () => {
                     <button
                       onClick={() => toast(`Viewing ${service.serviceName}`)}
                       className="text-blue-500 hover:text-blue-700 transition"
-                      title="View Details"
                     >
                       <FaEye />
                     </button>
                     <button
-                      onClick={() => toast(`Edit feature coming soon`)}
+                      onClick={() => openEditModal(service)}
                       className="text-green-500 hover:text-green-700 transition"
-                      title="Edit"
                     >
                       <FaEdit />
                     </button>
                     <button
                       onClick={() => handleDelete(service._id)}
                       className="text-red-500 hover:text-red-700 transition"
-                      title="Delete"
                     >
                       <FaTrash />
                     </button>
@@ -134,6 +185,69 @@ const MyServices = () => {
           </table>
         )}
       </motion.div>
+
+      {/* Edit Modal */}
+      {editService && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+          <motion.div
+            className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+          >
+            <h3 className="text-xl font-bold mb-4">Edit Service</h3>
+            <form className="space-y-4" onSubmit={handleEditSubmit}>
+              <input
+                type="text"
+                name="serviceName"
+                value={formData.serviceName}
+                onChange={handleChange}
+                placeholder="Service Name"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
+              />
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                placeholder="Category"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
+              />
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="Price"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
+              />
+              <input
+                type="text"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleChange}
+                placeholder="Image URL"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
