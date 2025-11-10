@@ -1,11 +1,15 @@
 import React, { useContext } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { AuthContext } from "../Provider/AuthProvider";
 import toast from "react-hot-toast";
 
 const LogIn = () => {
   const { signInUser, setUser, signInWithGoogle } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // get redirect path if available, otherwise go to home
+  const from = location.state?.from?.pathname || "/";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,7 +22,7 @@ const LogIn = () => {
       const result = await signInUser(email, password);
       setUser(result.user);
       toast.success(`Welcome back, ${result.user.displayName || "User"}!`);
-      navigate("/");
+      navigate(from, { replace: true });
     } catch (error) {
       console.error(error);
       toast.error(error.message);
@@ -30,7 +34,7 @@ const LogIn = () => {
       const result = await signInWithGoogle();
       setUser(result.user);
       toast.success(`Logged in as ${result.user.displayName || "User"}!`);
-      navigate("/");
+      navigate(from, { replace: true });
     } catch (error) {
       console.error(error);
       toast.error(error.message);
