@@ -10,6 +10,7 @@ import LogIn from "../Pages/LogIn";
 import Registration from "../Pages/Registration";
 import PrivateRoute from "./PrivateRoute";
 import ServiceDetails from "../Pages/ServiceDetails";
+import NotFound from "../Pages/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -71,7 +72,7 @@ const router = createBrowserRouter([
       },
       {
         path: "*",
-        element: <h2>Error</h2>,
+        element: <NotFound />,
       },
     ],
   },

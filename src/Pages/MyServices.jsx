@@ -188,7 +188,7 @@ const MyServices = () => {
 
       {/* Edit Modal */}
       {editService && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+        <div className="fixed inset-0 flex items-center justify-center  bg-opacity-30 z-50">
           <motion.div
             className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md"
             initial={{ scale: 0.8, opacity: 0 }}
