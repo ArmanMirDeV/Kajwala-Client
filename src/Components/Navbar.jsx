@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Sun, Moon } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import logo from "../assets/logo.png";
 import { AuthContext } from "../Provider/AuthProvider";
 
-// Modern icons
+// Icons
 import {
   MdHomeRepairService,
   MdAddCircleOutline,
@@ -20,13 +20,17 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
-  const location = useLocation();
+  const [theme, setTheme] = useState(
+    document.documentElement.getAttribute("data-theme") || "light"
+  );
 
+  const location = useLocation();
   const { user, logOut } = useContext(AuthContext);
+
   const desktopDropdownRef = useRef();
   const mobileDropdownRef = useRef();
 
-  // Handle click outside for dropdowns
+  // Handle click outside dropdowns
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -46,10 +50,20 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Navigation Links
+  // Theme toggle
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    setTheme(newTheme);
+  };
+
   const menuItems = [
     { name: "Home", path: "/", icon: <IoHomeOutline /> },
-    { name: "Services", path: "/services", icon: <MdMiscellaneousServices /> },
+    {
+      name: "All Services",
+      path: "/services",
+      icon: <MdMiscellaneousServices />,
+    },
     ...(user
       ? [
           {
@@ -71,39 +85,21 @@ const Navbar = () => {
       : []),
   ];
 
-  // Dropdown Items
   const dropdownItems = user
     ? [
-        {
-          name: "Profile",
-          path: "/profile",
-          icon: <IoPersonCircleOutline />,
-        },
-        {
-          name: "Logout",
-          path: "#",
-          icon: <MdLogout />,
-          action: logOut,
-        },
+        { name: "Profile", path: "/profile", icon: <IoPersonCircleOutline /> },
+        { name: "Logout", path: "#", icon: <MdLogout />, action: logOut },
       ]
     : [
-        {
-          name: "Login",
-          path: "/login",
-          icon: <MdLogin />,
-        },
-        {
-          name: "Register",
-          path: "/registration",
-          icon: <FiUserPlus />,
-        },
+        { name: "Login", path: "/login", icon: <MdLogin /> },
+        { name: "Register", path: "/registration", icon: <FiUserPlus /> },
       ];
 
   const renderMenuLink = (item, closeMenu) => (
     <Link
       key={item.name}
       to={item.path}
-      className={`flex items-center gap-2 text-gray-700 font-medium hover:text-rose-600 transition-colors ${
+      className={`flex items-center gap-2 font-medium text-gray-700 hover:text-rose-600 transition-colors ${
         location.pathname === item.path ? "text-rose-600 font-semibold" : ""
       }`}
       onClick={closeMenu}
@@ -114,7 +110,11 @@ const Navbar = () => {
   );
 
   return (
-    <header className="bg-white shadow-md w-full sticky top-0 z-50">
+    <header
+      className={`w-full sticky top-0 z-50 shadow-md ${
+        theme === "dark" ? "bg-gray-900" : "bg-white"
+      }`}
+    >
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <motion.div
@@ -136,25 +136,33 @@ const Navbar = () => {
           </Link>
         </motion.div>
 
-        {/* Desktop Nav */}
+        {/* Desktop Menu */}
         <nav className="hidden md:flex items-center gap-6">
           {menuItems.map((item) => renderMenuLink(item, () => {}))}
 
-          {/* Account Dropdown */}
-          <div className="relative" ref={desktopDropdownRef}>
+          {/* Profile & Theme */}
+          <div
+            className="relative flex items-center gap-4"
+            ref={desktopDropdownRef}
+          >
+            <button
+              onClick={toggleTheme}
+              className="text-gray-700 hover:text-rose-600 transition-colors"
+              title="Toggle Theme"
+            >
+              {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
+
             <button
               className="flex items-center gap-2 text-gray-700 hover:text-rose-600 transition-colors"
               onClick={() => setDesktopDropdownOpen(!desktopDropdownOpen)}
             >
               {user ? (
-                <div className="flex items-center gap-2">
-                  <img
-                    src={user.photoURL || "https://i.pravatar.cc/40"}
-                    alt={user.displayName || "User"}
-                    className="w-8 h-8 rounded-full border border-gray-300"
-                  />
-                  <span>{user.displayName?.split(" ")[0]}</span>
-                </div>
+                <img
+                  src={user.photoURL || "https://i.pravatar.cc/40"}
+                  alt={user.displayName || "User"}
+                  className="w-8 h-8 rounded-full border border-gray-300"
+                />
               ) : (
                 <span>Account</span>
               )}
@@ -165,6 +173,7 @@ const Navbar = () => {
                 }`}
               />
             </button>
+
             <AnimatePresence>
               {desktopDropdownOpen && (
                 <motion.ul
@@ -172,7 +181,7 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-md"
+                  className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md"
                 >
                   {dropdownItems.map((item) => (
                     <li key={item.name}>
@@ -182,7 +191,7 @@ const Navbar = () => {
                             item.action();
                             setDesktopDropdownOpen(false);
                           }}
-                          className="w-full text-left flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                          className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-gray-700 transition-colors rounded"
                         >
                           {item.icon}
                           {item.name}
@@ -190,7 +199,7 @@ const Navbar = () => {
                       ) : (
                         <Link
                           to={item.path}
-                          className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-gray-700 transition-colors rounded"
                           onClick={() => setDesktopDropdownOpen(false)}
                         >
                           {item.icon}
@@ -222,7 +231,9 @@ const Navbar = () => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden bg-white shadow-inner"
+            className={`md:hidden shadow-inner ${
+              theme === "dark" ? "bg-gray-900" : "bg-white"
+            }`}
           >
             <nav className="flex flex-col px-6 py-4 space-y-3">
               {menuItems.map((item) =>
@@ -231,22 +242,19 @@ const Navbar = () => {
 
               {/* Mobile Dropdown */}
               <div
-                className="border-t border-gray-200 pt-3"
+                className="border-t border-gray-200 dark:border-gray-700 pt-3"
                 ref={mobileDropdownRef}
               >
                 <button
-                  className="flex items-center justify-between w-full text-gray-700 font-medium hover:text-rose-600 transition-colors"
+                  className="flex items-center justify-between w-full text-gray-700 dark:text-gray-200 font-medium hover:text-rose-600 transition-colors"
                   onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
                 >
                   {user ? (
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={user.photoURL || "https://i.pravatar.cc/40"}
-                        alt={user.displayName || "User"}
-                        className="w-8 h-8 rounded-full border border-gray-300"
-                      />
-                      <span>{user.displayName?.split(" ")[0]}</span>
-                    </div>
+                    <img
+                      src={user.photoURL || "https://i.pravatar.cc/40"}
+                      alt={user.displayName || "User"}
+                      className="w-8 h-8 rounded-full border border-gray-300"
+                    />
                   ) : (
                     "Account"
                   )}
@@ -257,6 +265,7 @@ const Navbar = () => {
                     }`}
                   />
                 </button>
+
                 <AnimatePresence>
                   {mobileDropdownOpen && (
                     <motion.div
@@ -266,6 +275,17 @@ const Navbar = () => {
                       transition={{ duration: 0.2 }}
                       className="flex flex-col mt-2 space-y-1"
                     >
+                      <button
+                        onClick={toggleTheme}
+                        className="flex items-center gap-2 text-gray-700 dark:text-gray-200 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
+                      >
+                        {theme === "light" ? (
+                          <Moon size={18} />
+                        ) : (
+                          <Sun size={18} />
+                        )}
+                        Toggle Theme
+                      </button>
                       {dropdownItems.map((item) =>
                         item.action ? (
                           <button
@@ -275,7 +295,7 @@ const Navbar = () => {
                               setMenuOpen(false);
                               setMobileDropdownOpen(false);
                             }}
-                            className="flex items-center gap-2 text-gray-700 px-2 py-2 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
+                            className="flex items-center gap-2 text-gray-700 dark:text-gray-200 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
                           >
                             {item.icon}
                             {item.name}
@@ -284,7 +304,7 @@ const Navbar = () => {
                           <Link
                             key={item.name}
                             to={item.path}
-                            className="flex items-center gap-2 text-gray-700 px-2 py-2 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
+                            className="flex items-center gap-2 text-gray-700 dark:text-gray-200 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
                             onClick={() => {
                               setMenuOpen(false);
                               setMobileDropdownOpen(false);
