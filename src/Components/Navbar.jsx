@@ -1,10 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import logo from "../assets/logo.png";
-import { FaHome, FaServicestack, FaUser } from "react-icons/fa";
-import { FcServices } from "react-icons/fc";
+import { AuthContext } from "../Provider/AuthProvider";
+
+// Modern icons
+import {
+  MdHomeRepairService,
+  MdAddCircleOutline,
+  MdMiscellaneousServices,
+  MdLogout,
+  MdLogin,
+} from "react-icons/md";
+import { IoHomeOutline, IoPersonCircleOutline } from "react-icons/io5";
+import { FiUserPlus } from "react-icons/fi";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,10 +22,11 @@ const Navbar = () => {
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const location = useLocation();
 
+  const { user, logOut } = useContext(AuthContext);
   const desktopDropdownRef = useRef();
   const mobileDropdownRef = useRef();
 
-  // Close dropdowns on outside click
+  // Handle click outside for dropdowns
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -35,36 +46,75 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Navigation Links
   const menuItems = [
-    { name: "Home", path: "/", icon: <FaHome /> },
-    { name: "Services", path: "/services", icon: <FcServices /> },
-    { name: "My Services", path: "/my-services", icon: <FcServices /> },
-    { name: "Add Service", path: "/add-services", icon: <FcServices /> },
-    { name: "My Bookings", path: "/my-bookings", icon: <FcServices /> },
+    { name: "Home", path: "/", icon: <IoHomeOutline /> },
+    { name: "Services", path: "/services", icon: <MdMiscellaneousServices /> },
+    ...(user
+      ? [
+          {
+            name: "My Services",
+            path: "/my-services",
+            icon: <MdHomeRepairService />,
+          },
+          {
+            name: "Add Service",
+            path: "/add-services",
+            icon: <MdAddCircleOutline />,
+          },
+          {
+            name: "My Bookings",
+            path: "/my-bookings",
+            icon: <MdMiscellaneousServices />,
+          },
+        ]
+      : []),
   ];
 
-  const dropdownItems = [
-    { name: "Profile", path: "/profile" },
-    { name: "Login", path: "/login" },
-    { name: "Register", path: "/registration" },
-  ];
+  // Dropdown Items
+  const dropdownItems = user
+    ? [
+        {
+          name: "Profile",
+          path: "/profile",
+          icon: <IoPersonCircleOutline />,
+        },
+        {
+          name: "Logout",
+          path: "#",
+          icon: <MdLogout />,
+          action: logOut,
+        },
+      ]
+    : [
+        {
+          name: "Login",
+          path: "/login",
+          icon: <MdLogin />,
+        },
+        {
+          name: "Register",
+          path: "/registration",
+          icon: <FiUserPlus />,
+        },
+      ];
 
   const renderMenuLink = (item, closeMenu) => (
     <Link
       key={item.name}
       to={item.path}
-      className={`flex items-center gap-2 text-gray-700 font-medium hover:text-blue-600 transition-colors ${
-        location.pathname === item.path ? "text-blue-600 font-semibold" : ""
+      className={`flex items-center gap-2 text-gray-700 font-medium hover:text-rose-600 transition-colors ${
+        location.pathname === item.path ? "text-rose-600 font-semibold" : ""
       }`}
       onClick={closeMenu}
     >
-      {item.icon && <span>{item.icon}</span>}
+      <span className="text-lg">{item.icon}</span>
       {item.name}
     </Link>
   );
 
   return (
-    <header className="bg-white shadow-md w-full">
+    <header className="bg-white shadow-md w-full sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <motion.div
@@ -75,12 +125,12 @@ const Navbar = () => {
         >
           <img
             src={logo}
-            alt="LocalServe Logo"
+            alt="KajWala Logo"
             className="w-12 h-12 rounded-full"
           />
           <Link
             to="/"
-            className="text-2xl font-bold text-blue-600 tracking-wide"
+            className="text-2xl font-bold text-rose-600 tracking-wide"
           >
             KajWala
           </Link>
@@ -90,13 +140,24 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center gap-6">
           {menuItems.map((item) => renderMenuLink(item, () => {}))}
 
-          {/* Desktop Dropdown */}
+          {/* Account Dropdown */}
           <div className="relative" ref={desktopDropdownRef}>
             <button
-              className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 text-gray-700 hover:text-rose-600 transition-colors"
               onClick={() => setDesktopDropdownOpen(!desktopDropdownOpen)}
             >
-              Account
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <img
+                    src={user.photoURL || "https://i.pravatar.cc/40"}
+                    alt={user.displayName || "User"}
+                    className="w-8 h-8 rounded-full border border-gray-300"
+                  />
+                  <span>{user.displayName?.split(" ")[0]}</span>
+                </div>
+              ) : (
+                <span>Account</span>
+              )}
               <ChevronDown
                 size={18}
                 className={`transition-transform duration-200 ${
@@ -111,17 +172,31 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-md"
+                  className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-md"
                 >
                   {dropdownItems.map((item) => (
                     <li key={item.name}>
-                      <Link
-                        to={item.path}
-                        className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        onClick={() => setDesktopDropdownOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
+                      {item.action ? (
+                        <button
+                          onClick={() => {
+                            item.action();
+                            setDesktopDropdownOpen(false);
+                          }}
+                          className="w-full text-left flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                        >
+                          {item.icon}
+                          {item.name}
+                        </button>
+                      ) : (
+                        <Link
+                          to={item.path}
+                          className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                          onClick={() => setDesktopDropdownOpen(false)}
+                        >
+                          {item.icon}
+                          {item.name}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </motion.ul>
@@ -160,10 +235,21 @@ const Navbar = () => {
                 ref={mobileDropdownRef}
               >
                 <button
-                  className="flex items-center justify-between w-full text-gray-700 font-medium hover:text-blue-600 transition-colors"
+                  className="flex items-center justify-between w-full text-gray-700 font-medium hover:text-rose-600 transition-colors"
                   onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
                 >
-                  Account
+                  {user ? (
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={user.photoURL || "https://i.pravatar.cc/40"}
+                        alt={user.displayName || "User"}
+                        className="w-8 h-8 rounded-full border border-gray-300"
+                      />
+                      <span>{user.displayName?.split(" ")[0]}</span>
+                    </div>
+                  ) : (
+                    "Account"
+                  )}
                   <ChevronDown
                     size={18}
                     className={`transition-transform duration-200 ${
@@ -180,19 +266,35 @@ const Navbar = () => {
                       transition={{ duration: 0.2 }}
                       className="flex flex-col mt-2 space-y-1"
                     >
-                      {dropdownItems.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.path}
-                          className="block text-gray-700 px-2 py-1 hover:bg-blue-50 hover:text-blue-600 rounded transition-colors"
-                          onClick={() => {
-                            setMenuOpen(false);
-                            setMobileDropdownOpen(false);
-                          }}
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
+                      {dropdownItems.map((item) =>
+                        item.action ? (
+                          <button
+                            key={item.name}
+                            onClick={() => {
+                              item.action();
+                              setMenuOpen(false);
+                              setMobileDropdownOpen(false);
+                            }}
+                            className="flex items-center gap-2 text-gray-700 px-2 py-2 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
+                          >
+                            {item.icon}
+                            {item.name}
+                          </button>
+                        ) : (
+                          <Link
+                            key={item.name}
+                            to={item.path}
+                            className="flex items-center gap-2 text-gray-700 px-2 py-2 hover:bg-rose-50 hover:text-rose-600 rounded transition-colors"
+                            onClick={() => {
+                              setMenuOpen(false);
+                              setMobileDropdownOpen(false);
+                            }}
+                          >
+                            {item.icon}
+                            {item.name}
+                          </Link>
+                        )
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
