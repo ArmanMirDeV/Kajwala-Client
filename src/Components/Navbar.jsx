@@ -20,8 +20,12 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+
+  // Initialize theme from localStorage or HTML attribute
   const [theme, setTheme] = useState(
-    document.documentElement.getAttribute("data-theme") || "light"
+    localStorage.getItem("theme") ||
+      document.documentElement.getAttribute("data-theme") ||
+      "light"
   );
 
   const location = useLocation();
@@ -50,11 +54,14 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Theme toggle
+  // Persist theme to localStorage and HTML attribute
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", newTheme);
-    setTheme(newTheme);
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const menuItems = [
