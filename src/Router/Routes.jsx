@@ -9,6 +9,7 @@ import Profile from "../Pages/Profile";
 import LogIn from "../Pages/LogIn";
 import Registration from "../Pages/Registration";
 import PrivateRoute from "./PrivateRoute";
+import ServiceDetails from "../Pages/ServiceDetails";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       {
         path: "registration",
         element: <Registration />,
+      },
+      {
+        path: "service-details/:id",
+        element: <ServiceDetails />,
       },
       {
         path: "*",
