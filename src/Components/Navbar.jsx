@@ -21,18 +21,20 @@ const Navbar = () => {
   const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
 
-  // Initialize theme from localStorage or HTML attribute
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") ||
-      document.documentElement.getAttribute("data-theme") ||
-      "light"
-  );
-
   const location = useLocation();
   const { user, logOut } = useContext(AuthContext);
 
   const desktopDropdownRef = useRef();
   const mobileDropdownRef = useRef();
+
+  // Initialize theme from localStorage
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+
+  // Apply theme to document root
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   // Handle click outside dropdowns
   useEffect(() => {
@@ -53,12 +55,6 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Persist theme to localStorage and HTML attribute
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -119,7 +115,7 @@ const Navbar = () => {
   return (
     <header
       className={`w-full sticky top-0 z-50 shadow-md ${
-        theme === "dark" ? "bg-gray-900" : "bg-white"
+        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-700"
       }`}
     >
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -147,21 +143,21 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center gap-6">
           {menuItems.map((item) => renderMenuLink(item, () => {}))}
 
-          {/* Profile & Theme */}
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+
+          {/* Profile Dropdown */}
           <div
             className="relative flex items-center gap-4"
             ref={desktopDropdownRef}
           >
             <button
-              onClick={toggleTheme}
-              className="text-gray-700 hover:text-rose-600 transition-colors"
-              title="Toggle Theme"
-            >
-              {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
-            </button>
-
-            <button
-              className="flex items-center gap-2 text-gray-700 hover:text-rose-600 transition-colors"
+              className="flex items-center gap-2 hover:text-rose-600 transition-colors"
               onClick={() => setDesktopDropdownOpen(!desktopDropdownOpen)}
             >
               {user ? (
@@ -188,7 +184,9 @@ const Navbar = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md"
+                  className={`absolute right-0 mt-2 w-44 rounded-lg shadow-md ${
+                    theme === "dark" ? "bg-gray-800 text-white" : "bg-white"
+                  }`}
                 >
                   {dropdownItems.map((item) => (
                     <li key={item.name}>
@@ -198,7 +196,7 @@ const Navbar = () => {
                             item.action();
                             setDesktopDropdownOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-gray-700 transition-colors rounded"
+                          className="w-full flex items-center gap-2 px-4 py-2 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-gray-700 rounded transition-colors"
                         >
                           {item.icon}
                           {item.name}
@@ -206,7 +204,7 @@ const Navbar = () => {
                       ) : (
                         <Link
                           to={item.path}
-                          className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-gray-700 transition-colors rounded"
+                          className="flex items-center gap-2 px-4 py-2 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-gray-700 rounded transition-colors"
                           onClick={() => setDesktopDropdownOpen(false)}
                         >
                           {item.icon}
@@ -222,10 +220,7 @@ const Navbar = () => {
         </nav>
 
         {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-gray-700"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
+        <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
@@ -238,9 +233,11 @@ const Navbar = () => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className={`md:hidden shadow-inner ${
-              theme === "dark" ? "bg-gray-900" : "bg-white"
-            }`}
+            className={`${
+              theme === "dark"
+                ? "bg-gray-900 text-white"
+                : "bg-white text-gray-700"
+            } md:hidden shadow-inner`}
           >
             <nav className="flex flex-col px-6 py-4 space-y-3">
               {menuItems.map((item) =>
@@ -253,7 +250,7 @@ const Navbar = () => {
                 ref={mobileDropdownRef}
               >
                 <button
-                  className="flex items-center justify-between w-full text-gray-700 dark:text-gray-200 font-medium hover:text-rose-600 transition-colors"
+                  className="flex items-center justify-between w-full font-medium hover:text-rose-600 transition-colors"
                   onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
                 >
                   {user ? (
@@ -284,7 +281,7 @@ const Navbar = () => {
                     >
                       <button
                         onClick={toggleTheme}
-                        className="flex items-center gap-2 text-gray-700 dark:text-gray-200 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
+                        className="flex items-center gap-2 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
                       >
                         {theme === "light" ? (
                           <Moon size={18} />
@@ -293,6 +290,7 @@ const Navbar = () => {
                         )}
                         Toggle Theme
                       </button>
+
                       {dropdownItems.map((item) =>
                         item.action ? (
                           <button
@@ -302,7 +300,7 @@ const Navbar = () => {
                               setMenuOpen(false);
                               setMobileDropdownOpen(false);
                             }}
-                            className="flex items-center gap-2 text-gray-700 dark:text-gray-200 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
+                            className="flex items-center gap-2 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
                           >
                             {item.icon}
                             {item.name}
@@ -311,7 +309,7 @@ const Navbar = () => {
                           <Link
                             key={item.name}
                             to={item.path}
-                            className="flex items-center gap-2 text-gray-700 dark:text-gray-200 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
+                            className="flex items-center gap-2 px-2 py-2 hover:bg-rose-50 dark:hover:bg-gray-700 hover:text-rose-600 rounded transition-colors"
                             onClick={() => {
                               setMenuOpen(false);
                               setMobileDropdownOpen(false);

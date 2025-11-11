@@ -9,11 +9,11 @@ const MyBookings = () => {
   const { user } = useContext(AuthContext);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [reviewModal, setReviewModal] = useState(null); 
+  const [reviewModal, setReviewModal] = useState(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  //  Fetch user bookings
+  // Fetch user bookings
   useEffect(() => {
     if (!user?.email) return;
     const fetchBookings = async () => {
@@ -32,7 +32,7 @@ const MyBookings = () => {
     fetchBookings();
   }, [user]);
 
-  //  Cancel booking
+  // Cancel booking
   const handleCancel = async (id) => {
     const result = await Swal.fire({
       title: "Cancel Booking?",
@@ -62,32 +62,50 @@ const MyBookings = () => {
     }
   };
 
-  //  Submit review
+  // Submit review
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+
+    if (!reviewModal) return toast.error("No service selected.");
     if (rating === 0) return toast.error("Please select a rating.");
+    if (!comment.trim()) return toast.error("Please write a comment.");
 
     try {
       const reviewData = {
         userEmail: user.email,
         userName: user.displayName || "Anonymous",
         rating,
-        comment,
+        comment: comment.trim(),
         date: new Date().toISOString(),
       };
 
-      await axios.patch(
+      const res = await axios.patch(
         `http://localhost:3000/services/${reviewModal.serviceId}/review`,
         reviewData
       );
 
-      toast.success("Review submitted successfully!");
-      setReviewModal(null);
-      setRating(0);
-      setComment("");
+      if (res.data.modifiedCount > 0) {
+        toast.success("Review submitted successfully!");
+
+        // Mark booking as reviewed in UI
+        setBookings((prev) =>
+          prev.map((b) =>
+            b._id === reviewModal._id ? { ...b, reviewed: true } : b
+          )
+        );
+
+        // Reset modal
+        setReviewModal(null);
+        setRating(0);
+        setComment("");
+      } else {
+        toast.error("Failed to submit review. Try again.");
+      }
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit review. Please try again.");
+      console.error("Review submission error:", err.response || err.message);
+      toast.error(
+        err.response?.data?.error || "Failed to submit review. Try again."
+      );
     }
   };
 
@@ -155,8 +173,13 @@ const MyBookings = () => {
 
                     <button
                       onClick={() => setReviewModal(booking)}
-                      className="text-rose-500 hover:text-rose-700 transition"
-                      title="Add Review"
+                      className={`text-rose-500 hover:text-rose-700 transition ${
+                        booking.reviewed ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={booking.reviewed}
+                      title={
+                        booking.reviewed ? "Already Reviewed" : "Add Review"
+                      }
                     >
                       Review
                     </button>
@@ -168,7 +191,7 @@ const MyBookings = () => {
         )}
       </motion.div>
 
-      {/* 🔹 Review Modal */}
+      {/* Review Modal */}
       <AnimatePresence>
         {reviewModal && (
           <motion.div

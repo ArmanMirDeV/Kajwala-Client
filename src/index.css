@@ -1,2 +1,18 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1f2937;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #f3f4f6;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
