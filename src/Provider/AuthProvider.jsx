@@ -4,6 +4,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
   updateProfile,
@@ -19,36 +20,55 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  //  Create user with email, password, name, and photo
+  /** Create a new user and update profile */
   const createUser = async (email, password, name, photo) => {
     setLoading(true);
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    await updateProfile(userCredential.user, {
-      displayName: name,
-      photoURL: photo,
-    });
-    setUser(userCredential.user);
-    setLoading(false);
-    return userCredential;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await updateProfile(userCredential.user, {
+        displayName: name,
+        photoURL: photo,
+      });
+      setUser(userCredential.user);
+      return userCredential;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  //  Google Login
+  /** Sign in existing user with email & password */
+  const signInUser = async (email, password) => {
+    setLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      setUser(userCredential.user);
+      return userCredential;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Google Sign In */
   const signInWithGoogle = () => {
     setLoading(true);
     return signInWithPopup(auth, googleProvider);
   };
 
-  //  Logout
+  /** Logout user */
   const logOut = () => {
     setLoading(true);
     return signOut(auth);
   };
 
-  //  Track user state
+  /** Track Auth State */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -61,6 +81,7 @@ const AuthProvider = ({ children }) => {
     user,
     loading,
     createUser,
+    signInUser, 
     signInWithGoogle,
     logOut,
     setUser,
