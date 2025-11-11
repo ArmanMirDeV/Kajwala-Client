@@ -6,6 +6,7 @@ const TopRatedServicesSection = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+console.log(services);
 
   useEffect(() => {
     const fetchTopRatedServices = async () => {
@@ -55,15 +56,21 @@ const TopRatedServicesSection = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {services.map((service) => (
+            {services.map((service) => (
+            
             <div
               key={service._id}
               className="flex flex-col bg-white rounded-lg shadow-md p-5 transform transition duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer"
               onClick={() => navigate(`/service-details/${service._id}`)}
             >
-              <div className="overflow-hidden rounded-md mb-4">
+                <div className="overflow-hidden rounded-md mb-4">
+                  
+                  
                 <img
-                  src={service.image}
+                  src={
+                    service.imageUrl ||
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHOCzaEM17rj4LhXRx3nOezr76b-3BZ_WN_A&s"
+                  }
                   alt={service.serviceName}
                   className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
                 />

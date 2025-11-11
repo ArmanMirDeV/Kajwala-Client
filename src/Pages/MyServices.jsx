@@ -11,7 +11,6 @@ const MyServices = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Edit modal state
   const [editService, setEditService] = useState(null);
   const [formData, setFormData] = useState({
     serviceName: "",
@@ -20,7 +19,6 @@ const MyServices = () => {
     imageUrl: "",
   });
 
-  // Fetch services for this provider
   useEffect(() => {
     if (!user?.email) return;
 
@@ -41,7 +39,6 @@ const MyServices = () => {
     fetchServices();
   }, [user]);
 
-  // Delete service
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -69,7 +66,6 @@ const MyServices = () => {
     }
   };
 
-  // Open edit modal
   const openEditModal = (service) => {
     setEditService(service);
     setFormData({
@@ -80,15 +76,12 @@ const MyServices = () => {
     });
   };
 
-  // Close modal
   const closeEditModal = () => setEditService(null);
 
-  // Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Submit edit
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -129,68 +122,71 @@ const MyServices = () => {
         {services.length === 0 ? (
           <p className="text-center text-gray-500">No services added yet.</p>
         ) : (
-          <table className="w-full border border-gray-200 rounded-lg overflow-hidden text-sm md:text-base">
-            <thead className="bg-rose-500 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left">Image</th>
-                <th className="px-4 py-3 text-left">Service Name</th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Price</th>
-                <th className="px-4 py-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {services.map((service) => (
-                <tr
-                  key={service._id}
-                  className="border-b hover:bg-rose-50 transition"
-                >
-                  <td className="px-4 py-3">
-                    <img
-                      src={service.imageUrl}
-                      alt={service.serviceName}
-                      className="w-16 h-16 object-cover rounded-lg border"
-                    />
-                  </td>
-                  <td className="px-4 py-3 font-medium text-gray-700">
-                    {service.serviceName}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {service.category}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">${service.price}</td>
-                  <td className="px-4 py-3 flex items-center gap-3">
-                    <button
-                      onClick={() => toast(`Viewing ${service.serviceName}`)}
-                      className="text-blue-500 hover:text-blue-700 transition"
-                    >
-                      <FaEye />
-                    </button>
-                    <button
-                      onClick={() => openEditModal(service)}
-                      className="text-green-500 hover:text-green-700 transition"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(service._id)}
-                      className="text-red-500 hover:text-red-700 transition"
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200 rounded-lg text-sm md:text-base">
+              <thead className="bg-rose-500 text-white">
+                <tr>
+                  <th className="px-3 md:px-4 py-2 text-left">Image</th>
+                  <th className="px-3 md:px-4 py-2 text-left">Service Name</th>
+                  <th className="px-3 md:px-4 py-2 text-left">Category</th>
+                  <th className="px-3 md:px-4 py-2 text-left">Price</th>
+                  <th className="px-3 md:px-4 py-2 text-left">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {services.map((service) => (
+                  <tr
+                    key={service._id}
+                    className="border-b hover:bg-rose-50 transition"
+                  >
+                    <td className="px-3 md:px-4 py-2">
+                      <img
+                        src={service.imageUrl}
+                        alt={service.serviceName}
+                        className="w-12 md:w-16 h-12 md:h-16 object-cover rounded-lg border"
+                      />
+                    </td>
+                    <td className="px-3 md:px-4 py-2 font-medium text-gray-700">
+                      {service.serviceName}
+                    </td>
+                    <td className="px-3 md:px-4 py-2 text-gray-600">
+                      {service.category}
+                    </td>
+                    <td className="px-3 md:px-4 py-2 text-gray-600">
+                      ${service.price}
+                    </td>
+                    <td className="px-3 md:px-4 py-2 flex items-center gap-2 md:gap-3">
+                      <button
+                        onClick={() => toast(`Viewing ${service.serviceName}`)}
+                        className="text-blue-500 hover:text-blue-700 transition"
+                      >
+                        <FaEye />
+                      </button>
+                      <button
+                        onClick={() => openEditModal(service)}
+                        className="text-green-500 hover:text-green-700 transition"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(service._id)}
+                        className="text-red-500 hover:text-red-700 transition"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </motion.div>
 
-      {/* Edit Modal */}
       {editService && (
-        <div className="fixed inset-0 flex items-center justify-center  bg-opacity-30 z-50">
+        <div className="fixed inset-0 flex items-center justify-center  bg-opacity-30 z-50 px-4">
           <motion.div
-            className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md"
+            className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md md:max-w-lg"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
@@ -229,7 +225,7 @@ const MyServices = () => {
                 placeholder="Image URL"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400"
               />
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col md:flex-row justify-end gap-2 mt-2">
                 <button
                   type="button"
                   onClick={closeEditModal}

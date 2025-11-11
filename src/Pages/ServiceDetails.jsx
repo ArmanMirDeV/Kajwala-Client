@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { AuthContext } from "../Provider/AuthProvider";
 import Loading from "./Loading";
-import { Star } from "lucide-react";
+import { Star, Info } from "lucide-react";
 
 const ServiceDetails = () => {
   const { id } = useParams();
@@ -33,18 +33,17 @@ const ServiceDetails = () => {
   }, [id]);
 
   if (loading) return <Loading />;
-
   if (!service)
     return (
       <div className="text-center mt-10 text-gray-500">Service not found.</div>
     );
 
-  const isOwner = user?.email === service.email;
+  const isOwner = user?.email === service.providerEmail;
 
   const handleBooking = async (e) => {
     e.preventDefault();
-    if (!bookingDate) return toast.error("Please select a booking date.");
     if (isOwner) return toast.error("You cannot book your own service!");
+    if (!bookingDate) return toast.error("Please select a booking date.");
 
     const bookingData = {
       userEmail: user.email,
@@ -60,6 +59,7 @@ const ServiceDetails = () => {
       await axios.post("http://localhost:3000/bookings", bookingData);
       toast.success("Booking successful!");
       setBookingModalOpen(false);
+      setBookingDate("");
     } catch (err) {
       console.error(err);
       toast.error("Failed to book service.");
@@ -76,7 +76,7 @@ const ServiceDetails = () => {
         transition={{ duration: 0.5 }}
       >
         <img
-          src={service.image}
+          src={service.imageUrl}
           alt={service.serviceName}
           className="w-full h-64 object-cover rounded mb-4"
         />
@@ -91,24 +91,32 @@ const ServiceDetails = () => {
           <strong>Provider:</strong> {service.providerName}
         </p>
         <p className="mb-2">
-          <strong>Contact:</strong> {service.email}
+          <strong>Contact:</strong> {service.providerEmail}
         </p>
         <p className="mb-4">{service.description}</p>
 
-        <button
-          onClick={() => {
-            if (isOwner) toast.error("You cannot book your own service!");
-            else setBookingModalOpen(true);
-          }}
-          disabled={isOwner}
-          className={`px-5 py-2 rounded-lg text-white font-medium transition-all duration-300 ${
-            isOwner
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-red-500 hover:bg-red-600 hover:scale-105"
-          }`}
-        >
-          {isOwner ? "Cannot Book Your Own Service" : "Book Now"}
-        </button>
+        {/* Book Button with Tooltip */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => {
+              if (!isOwner) setBookingModalOpen(true);
+            }}
+            disabled={isOwner}
+            className={`px-5 py-2 rounded-lg text-white font-medium transition-all duration-300 ${
+              isOwner
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-500 hover:bg-red-600 hover:scale-105"
+            }`}
+          >
+            {isOwner ? "Cannot Book Your Own Service" : "Book Now"}
+          </button>
+
+          {isOwner && (
+            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">
+              You are the provider
+            </span>
+          )}
+        </div>
       </motion.div>
 
       {/* Reviews Section */}
@@ -152,7 +160,7 @@ const ServiceDetails = () => {
 
       {/* Booking Modal */}
       <AnimatePresence>
-        {bookingModalOpen && (
+        {bookingModalOpen && !isOwner && (
           <motion.div
             className="fixed inset-0 flex items-center justify-center z-50 px-4"
             initial={{ opacity: 0, y: -50 }}
@@ -178,7 +186,7 @@ const ServiceDetails = () => {
                     type="email"
                     value={user.email}
                     readOnly
-                    className="w-full px-3 py-2 border rounded"
+                    className="w-full px-3 py-2 border rounded bg-gray-100"
                   />
                 </div>
 

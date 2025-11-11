@@ -13,7 +13,6 @@ const MyBookings = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  // Fetch user bookings
   useEffect(() => {
     if (!user?.email) return;
     const fetchBookings = async () => {
@@ -32,7 +31,6 @@ const MyBookings = () => {
     fetchBookings();
   }, [user]);
 
-  // Cancel booking
   const handleCancel = async (id) => {
     const result = await Swal.fire({
       title: "Cancel Booking?",
@@ -62,7 +60,6 @@ const MyBookings = () => {
     }
   };
 
-  // Submit review
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
 
@@ -87,14 +84,12 @@ const MyBookings = () => {
       if (res.data.modifiedCount > 0) {
         toast.success("Review submitted successfully!");
 
-        // Mark booking as reviewed in UI
         setBookings((prev) =>
           prev.map((b) =>
             b._id === reviewModal._id ? { ...b, reviewed: true } : b
           )
         );
 
-        // Reset modal
         setReviewModal(null);
         setRating(0);
         setComment("");
@@ -118,76 +113,82 @@ const MyBookings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-rose-100 py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-rose-100 py-10 px-2 sm:px-4">
       <motion.div
-        className="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl p-6 overflow-x-auto"
+        className="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl p-4 sm:p-6 overflow-x-auto"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-2xl font-bold text-rose-600 mb-6 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold text-rose-600 mb-6 text-center">
           My Bookings
         </h2>
 
         {bookings.length === 0 ? (
           <p className="text-center text-gray-500">You have no bookings yet.</p>
         ) : (
-          <table className="w-full border border-gray-200 rounded-lg text-sm md:text-base">
-            <thead className="bg-rose-500 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left">Service Name</th>
-                <th className="px-4 py-3 text-left">Provider</th>
-                <th className="px-4 py-3 text-left">Booking Date</th>
-                <th className="px-4 py-3 text-left">Price</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((booking) => (
-                <tr
-                  key={booking._id}
-                  className="border-b hover:bg-rose-50 transition"
-                >
-                  <td className="px-4 py-3 font-medium text-gray-700">
-                    {booking.serviceName}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {booking.providerName}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {booking.bookingDate}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">${booking.price}</td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {booking.status || "Pending"}
-                  </td>
-                  <td className="px-4 py-3 flex items-center gap-3">
-                    <button
-                      onClick={() => handleCancel(booking._id)}
-                      className="text-red-500 hover:text-red-700 transition"
-                      title="Cancel Booking"
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      onClick={() => setReviewModal(booking)}
-                      className={`text-rose-500 hover:text-rose-700 transition ${
-                        booking.reviewed ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      disabled={booking.reviewed}
-                      title={
-                        booking.reviewed ? "Already Reviewed" : "Add Review"
-                      }
-                    >
-                      Review
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border border-gray-200 rounded-lg text-sm sm:text-base">
+              <thead className="bg-rose-500 text-white">
+                <tr>
+                  <th className="px-2 sm:px-4 py-2 text-left">Service Name</th>
+                  <th className="px-2 sm:px-4 py-2 text-left">Provider</th>
+                  <th className="px-2 sm:px-4 py-2 text-left">Booking Date</th>
+                  <th className="px-2 sm:px-4 py-2 text-left">Price</th>
+                  <th className="px-2 sm:px-4 py-2 text-left">Status</th>
+                  <th className="px-2 sm:px-4 py-2 text-left">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {bookings.map((booking) => (
+                  <tr
+                    key={booking._id}
+                    className="border-b hover:bg-rose-50 transition"
+                  >
+                    <td className="px-2 sm:px-4 py-2 font-medium text-gray-700">
+                      {booking.serviceName}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                      {booking.providerName}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                      {booking.bookingDate}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                      ${booking.price}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                      {booking.status || "Pending"}
+                    </td>
+                    <td className="px-2 sm:px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                      <button
+                        onClick={() => handleCancel(booking._id)}
+                        className="text-red-500 hover:text-red-700 transition"
+                        title="Cancel Booking"
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        onClick={() => setReviewModal(booking)}
+                        className={`text-rose-500 hover:text-rose-700 transition ${
+                          booking.reviewed
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={booking.reviewed}
+                        title={
+                          booking.reviewed ? "Already Reviewed" : "Add Review"
+                        }
+                      >
+                        Review
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </motion.div>
 
@@ -195,18 +196,18 @@ const MyBookings = () => {
       <AnimatePresence>
         {reviewModal && (
           <motion.div
-            className="fixed inset-0 flex items-center justify-center z-50 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/30 backdrop-blur-sm px-2 sm:px-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-md"
+              className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg w-full max-w-md"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
             >
-              <h3 className="text-2xl font-bold text-rose-600 mb-2">
+              <h3 className="text-2xl sm:text-3xl font-bold text-rose-600 mb-2">
                 Review {reviewModal.serviceName}
               </h3>
               <p className="text-gray-500 mb-4">
@@ -214,8 +215,7 @@ const MyBookings = () => {
               </p>
 
               <form onSubmit={handleReviewSubmit} className="space-y-4">
-                {/* Rating Stars */}
-                <div className="flex gap-2 justify-center text-2xl">
+                <div className="flex gap-2 justify-center text-2xl sm:text-3xl">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span
                       key={star}
@@ -231,15 +231,14 @@ const MyBookings = () => {
                   ))}
                 </div>
 
-                {/* Comment */}
                 <textarea
                   placeholder="Write your review..."
-                  className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-rose-400"
+                  className="w-full border rounded-lg px-3 sm:px-4 py-2 focus:ring-2 focus:ring-rose-400"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                 />
 
-                <div className="flex justify-end gap-2">
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setReviewModal(null)}
