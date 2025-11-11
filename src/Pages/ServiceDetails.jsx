@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { AuthContext } from "../Provider/AuthProvider";
 import Loading from "./Loading";
+import { Star } from "lucide-react";
 
 const ServiceDetails = () => {
   const { id } = useParams();
@@ -32,9 +33,7 @@ const ServiceDetails = () => {
     fetchService();
   }, [id]);
 
-  if (loading) {
-    <Loading />
-  }
+  if (loading) return <Loading />;
 
   if (!service) {
     return (
@@ -89,6 +88,7 @@ const ServiceDetails = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Image and Info */}
         <img
           src={service.imageUrl}
           alt={service.serviceName}
@@ -128,6 +128,50 @@ const ServiceDetails = () => {
         </button>
       </motion.div>
 
+      {/* Reviews Section */}
+      <motion.div
+        className="max-w-4xl mx-auto mt-10 bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <h3 className="text-2xl font-semibold text-rose-600 mb-4">
+          Reviews ({service.reviews?.length || 0})
+        </h3>
+
+        {service.reviews?.length > 0 ? (
+          <div className="space-y-4">
+            {service.reviews.map((review, idx) => (
+              <div
+                key={idx}
+                className="border-b pb-3 border-gray-200 dark:border-gray-700"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-5 h-5 ${
+                        i < review.rating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-gray-700 dark:text-gray-300 italic">
+                  “{review.comment}”
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  — {review.userName || "Anonymous"}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 italic">No reviews yet.</p>
+        )}
+      </motion.div>
+
       {/* Booking Modal */}
       {bookingModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50  bg-opacity-40">
@@ -145,7 +189,7 @@ const ServiceDetails = () => {
               Book {service.serviceName}
             </h3>
             <p className="text-xl font-bold text-rose-600 mb-4">
-             ${service.price} 
+              ${service.price}
             </p>
 
             <form className="space-y-4" onSubmit={handleBooking}>
