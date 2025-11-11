@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { AuthContext } from "../Provider/AuthProvider";
 
@@ -9,11 +9,13 @@ const MyBookings = () => {
   const { user } = useContext(AuthContext);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewModal, setReviewModal] = useState(null); 
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
 
-  // Fetch bookings for the logged-in user
+  //  Fetch user bookings
   useEffect(() => {
     if (!user?.email) return;
-
     const fetchBookings = async () => {
       try {
         const res = await axios.get(
@@ -27,11 +29,10 @@ const MyBookings = () => {
         setLoading(false);
       }
     };
-
     fetchBookings();
   }, [user]);
 
-  // Handle booking cancellation
+  //  Cancel booking
   const handleCancel = async (id) => {
     const result = await Swal.fire({
       title: "Cancel Booking?",
@@ -53,13 +54,40 @@ const MyBookings = () => {
             "Your booking has been cancelled.",
             "success"
           );
-        } else {
-          Swal.fire("Error!", "Booking not found.", "error");
         }
       } catch (err) {
         console.error(err);
         Swal.fire("Error!", "Failed to cancel booking.", "error");
       }
+    }
+  };
+
+  //  Submit review
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (rating === 0) return toast.error("Please select a rating.");
+
+    try {
+      const reviewData = {
+        userEmail: user.email,
+        userName: user.displayName || "Anonymous",
+        rating,
+        comment,
+        date: new Date().toISOString(),
+      };
+
+      await axios.patch(
+        `http://localhost:3000/services/${reviewModal.serviceId}/review`,
+        reviewData
+      );
+
+      toast.success("Review submitted successfully!");
+      setReviewModal(null);
+      setRating(0);
+      setComment("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit review. Please try again.");
     }
   };
 
@@ -124,6 +152,14 @@ const MyBookings = () => {
                     >
                       Cancel
                     </button>
+
+                    <button
+                      onClick={() => setReviewModal(booking)}
+                      className="text-rose-500 hover:text-rose-700 transition"
+                      title="Add Review"
+                    >
+                      Review
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -131,6 +167,75 @@ const MyBookings = () => {
           </table>
         )}
       </motion.div>
+
+      {/* 🔹 Review Modal */}
+      <AnimatePresence>
+        {reviewModal && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/30 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-md"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              <h3 className="text-2xl font-bold text-rose-600 mb-2">
+                Review {reviewModal.serviceName}
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Provider: {reviewModal.providerName}
+              </p>
+
+              <form onSubmit={handleReviewSubmit} className="space-y-4">
+                {/* Rating Stars */}
+                <div className="flex gap-2 justify-center text-2xl">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      onClick={() => setRating(star)}
+                      className={`cursor-pointer transition ${
+                        star <= rating
+                          ? "text-yellow-400 scale-110"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+
+                {/* Comment */}
+                <textarea
+                  placeholder="Write your review..."
+                  className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-rose-400"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReviewModal(null)}
+                    className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { AuthContext } from "../Provider/AuthProvider";
+import Loading from "./Loading";
 
 const ServiceDetails = () => {
   const { id } = useParams();
@@ -32,11 +33,7 @@ const ServiceDetails = () => {
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
-        Loading service details...
-      </div>
-    );
+    <Loading />
   }
 
   if (!service) {
@@ -110,6 +107,9 @@ const ServiceDetails = () => {
           <span className="font-semibold">Provider:</span>{" "}
           {service.providerName}
         </p>
+        <p className="mb-2">
+          <span className="font-semibold">Contact:</span> {service.email}
+        </p>
         <p className="mb-4">{service.description}</p>
 
         <button
@@ -144,6 +144,9 @@ const ServiceDetails = () => {
             <h3 className="text-2xl font-bold text-rose-600 mb-4">
               Book {service.serviceName}
             </h3>
+            <p className="text-xl font-bold text-rose-600 mb-4">
+             ${service.price} 
+            </p>
 
             <form className="space-y-4" onSubmit={handleBooking}>
               <div>
