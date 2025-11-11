@@ -1,7 +1,8 @@
+// src/Components/ServiceDetails.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { AuthContext } from "../Provider/AuthProvider";
 import Loading from "./Loading";
@@ -13,11 +14,9 @@ const ServiceDetails = () => {
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Booking modal state
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [bookingDate, setBookingDate] = useState("");
 
-  // Fetch service details
   useEffect(() => {
     const fetchService = async () => {
       try {
@@ -35,26 +34,17 @@ const ServiceDetails = () => {
 
   if (loading) return <Loading />;
 
-  if (!service) {
+  if (!service)
     return (
-      <div className="text-center text-gray-500 mt-10">Service not found.</div>
+      <div className="text-center mt-10 text-gray-500">Service not found.</div>
     );
-  }
 
-  // Check if the logged-in user is the provider
-  const isOwner = user?.email === service.providerEmail;
+  const isOwner = user?.email === service.email;
 
-  // Handle booking
   const handleBooking = async (e) => {
     e.preventDefault();
-    if (!bookingDate) {
-      toast.error("Please select a booking date.");
-      return;
-    }
-    if (isOwner) {
-      toast.error("You cannot book your own service!");
-      return;
-    }
+    if (!bookingDate) return toast.error("Please select a booking date.");
+    if (isOwner) return toast.error("You cannot book your own service!");
 
     const bookingData = {
       userEmail: user.email,
@@ -77,38 +67,31 @@ const ServiceDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-rose-100 py-10 px-4">
+    <div className="min-h-screen py-10 px-4 bg-white text-gray-800">
+      {/* Service Info */}
       <motion.div
-        className={`max-w-4xl mx-auto p-6 rounded-2xl shadow-xl ${
-          document.documentElement.getAttribute("data-theme") === "dark"
-            ? "bg-gray-800 text-white"
-            : "bg-white text-gray-800"
-        }`}
+        className="max-w-4xl mx-auto p-6 border rounded-lg shadow-sm"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Image and Info */}
         <img
-          src={service.imageUrl}
+          src={service.image}
           alt={service.serviceName}
-          className="w-full h-64 object-cover rounded-xl mb-6"
+          className="w-full h-64 object-cover rounded mb-4"
         />
-        <h2 className="text-3xl font-bold text-rose-600 mb-3">
-          {service.serviceName}
-        </h2>
-        <p className="mb-2">
-          <span className="font-semibold">Category:</span> {service.category}
+        <h2 className="text-2xl font-bold mb-2">{service.serviceName}</h2>
+        <p className="mb-1">
+          <strong>Category:</strong> {service.category}
+        </p>
+        <p className="mb-1">
+          <strong>Price:</strong> ${service.price}
+        </p>
+        <p className="mb-1">
+          <strong>Provider:</strong> {service.providerName}
         </p>
         <p className="mb-2">
-          <span className="font-semibold">Price:</span> ${service.price}
-        </p>
-        <p className="mb-2">
-          <span className="font-semibold">Provider:</span>{" "}
-          {service.providerName}
-        </p>
-        <p className="mb-2">
-          <span className="font-semibold">Contact:</span> {service.email}
+          <strong>Contact:</strong> {service.email}
         </p>
         <p className="mb-4">{service.description}</p>
 
@@ -118,10 +101,10 @@ const ServiceDetails = () => {
             else setBookingModalOpen(true);
           }}
           disabled={isOwner}
-          className={`px-6 py-2 rounded-lg text-white transition ${
+          className={`px-5 py-2 rounded-lg text-white font-medium transition-all duration-300 ${
             isOwner
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-rose-500 hover:bg-rose-600"
+              : "bg-red-500 hover:bg-red-600 hover:scale-105"
           }`}
         >
           {isOwner ? "Cannot Book Your Own Service" : "Book Now"}
@@ -130,23 +113,20 @@ const ServiceDetails = () => {
 
       {/* Reviews Section */}
       <motion.div
-        className="max-w-4xl mx-auto mt-10 bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6"
+        className="max-w-4xl mx-auto mt-8 p-6 border rounded-lg shadow-sm"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ delay: 0.2 }}
       >
-        <h3 className="text-2xl font-semibold text-rose-600 mb-4">
+        <h3 className="text-xl font-semibold mb-4">
           Reviews ({service.reviews?.length || 0})
         </h3>
 
         {service.reviews?.length > 0 ? (
           <div className="space-y-4">
             {service.reviews.map((review, idx) => (
-              <div
-                key={idx}
-                className="border-b pb-3 border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex items-center gap-2 mb-1">
+              <div key={idx} className="border-b pb-3">
+                <div className="flex items-center gap-1 mb-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
@@ -158,101 +138,81 @@ const ServiceDetails = () => {
                     />
                   ))}
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 italic">
-                  “{review.comment}”
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="italic">“{review.comment}”</p>
+                <p className="text-sm mt-1">
                   — {review.userName || "Anonymous"}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 italic">No reviews yet.</p>
+          <p className="italic">No reviews yet.</p>
         )}
       </motion.div>
 
       {/* Booking Modal */}
-      {bookingModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50  bg-opacity-40">
+      <AnimatePresence>
+        {bookingModalOpen && (
           <motion.div
-            className={`w-full max-w-md p-6 rounded-2xl shadow-xl ${
-              document.documentElement.getAttribute("data-theme") === "dark"
-                ? "bg-gray-800 text-white"
-                : "bg-white text-gray-800"
-            }`}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50 px-4"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
           >
-            <h3 className="text-2xl font-bold text-rose-600 mb-4">
-              Book {service.serviceName}
-            </h3>
-            <p className="text-xl font-bold text-rose-600 mb-4">
-              ${service.price}
-            </p>
+            <motion.div
+              className="w-full max-w-md p-6 border rounded-lg shadow-lg bg-white"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h3 className="text-xl font-bold mb-4">
+                Book {service.serviceName}
+              </h3>
+              <p className="mb-4 font-semibold">Price: ${service.price}</p>
 
-            <form className="space-y-4" onSubmit={handleBooking}>
-              <div>
-                <label className="block mb-1">Your Email</label>
-                <input
-                  type="email"
-                  value={user.email}
-                  readOnly
-                  className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-                />
-              </div>
+              <form className="space-y-3" onSubmit={handleBooking}>
+                <div>
+                  <label className="block mb-1">Your Email</label>
+                  <input
+                    type="email"
+                    value={user.email}
+                    readOnly
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
 
-              <div>
-                <label className="block mb-1">Service Name</label>
-                <input
-                  type="text"
-                  value={service.serviceName}
-                  readOnly
-                  className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-                />
-              </div>
+                <div>
+                  <label className="block mb-1">Booking Date</label>
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    className="w-full px-3 py-2 border rounded"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block mb-1">Price</label>
-                <input
-                  type="text"
-                  value={`$${service.price}`}
-                  readOnly
-                  className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1">Booking Date</label>
-                <input
-                  type="date"
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setBookingModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition"
-                >
-                  Confirm Booking
-                </button>
-              </div>
-            </form>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBookingModalOpen(false)}
+                    className="px-3 py-2 border rounded hover:bg-gray-100 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-all duration-300 hover:scale-105"
+                  >
+                    Confirm Booking
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };

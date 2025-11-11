@@ -65,10 +65,10 @@ const HeroFixed = () => {
                 <p className="mb-4 text-sm md:text-lg">{slide.details}</p>
                 <Link
                   to="/services"
-                  className="bg-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                >
+                  className="bg-rose-500 text-white px-6 py-2 rounded-lg hover:bg-rose-600 transition-colors duration-200 font-medium">
                   Explore
                 </Link>
+                
               </div>
             </motion.div>
           )}
