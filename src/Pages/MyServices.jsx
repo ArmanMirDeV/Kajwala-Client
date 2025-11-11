@@ -155,7 +155,7 @@ const MyServices = () => {
                     <td className="px-3 md:px-4 py-2 text-gray-600">
                       ${service.price}
                     </td>
-                    <td className="px-3 md:px-4 py-2 flex items-center gap-2 md:gap-3">
+                    <td className="px-3 md:px-4 py-2 flex items-center justify-center mt-5 gap-2 md:gap-3">
                       <button
                         onClick={() => toast(`Viewing ${service.serviceName}`)}
                         className="text-blue-500 hover:text-blue-700 transition"
@@ -164,7 +164,7 @@ const MyServices = () => {
                       </button>
                       <button
                         onClick={() => openEditModal(service)}
-                        className="text-green-500 hover:text-green-700 transition"
+                        className="text-green-500 hover:text-green-700 transition "
                       >
                         <FaEdit />
                       </button>

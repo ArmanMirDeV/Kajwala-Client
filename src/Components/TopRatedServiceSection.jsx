@@ -6,7 +6,6 @@ const TopRatedServicesSection = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-console.log(services);
 
   useEffect(() => {
     const fetchTopRatedServices = async () => {
