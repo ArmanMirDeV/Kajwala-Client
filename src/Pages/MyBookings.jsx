@@ -20,7 +20,7 @@ const MyBookings = () => {
     const fetchBookings = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:3000/bookings/${user.email}`
+          `https://kajwala-server.vercel.app/bookings/${user.email}`
         );
         setBookings(data);
       } catch (err) {
@@ -49,7 +49,9 @@ const MyBookings = () => {
 
     if (result.isConfirmed) {
       try {
-        const res = await axios.delete(`http://localhost:3000/bookings/${id}`);
+        const res = await axios.delete(
+          `https://kajwala-server.vercel.app/bookings/${id}`
+        );
         if (res.data.deletedCount > 0) {
           setBookings((prev) => prev.filter((b) => b._id !== id));
           Swal.fire(
@@ -86,7 +88,7 @@ const MyBookings = () => {
       };
 
       const { data } = await axios.patch(
-        `http://localhost:3000/services/${reviewModal.serviceId}/review`,
+        `https://kajwala-server.vercel.app/services/${reviewModal.serviceId}/review`,
         reviewData
       );
 

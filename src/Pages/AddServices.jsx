@@ -38,7 +38,7 @@ const AddServices = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/services",
+        "https://kajwala-server.vercel.app/services",
         newService
       );
       if (response.status === 201 || response.status === 200) {

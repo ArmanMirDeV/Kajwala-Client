@@ -22,7 +22,9 @@ const Services = () => {
     const fetchServices = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:3000/services");
+        const res = await axios.get(
+          "https://kajwala-server.vercel.app/services"
+        );
         setServices(res.data);
         setFilteredServices(res.data);
 
@@ -61,9 +63,7 @@ const Services = () => {
   };
 
   if (loading) {
-    return (
-      <Loading/>
-    );
+    return <Loading />;
   }
 
   return (

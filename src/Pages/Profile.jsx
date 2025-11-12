@@ -127,8 +127,12 @@ const Profile = () => {
       try {
         const [{ data: providerStats }, { data: services }] = await Promise.all(
           [
-            axios.get(`http://localhost:3000/provider-stats/${user.email}`),
-            axios.get(`http://localhost:3000/my-services/${user.email}`),
+            axios.get(
+              `https://kajwala-server.vercel.app/provider-stats/${user.email}`
+            ),
+            axios.get(
+              `https://kajwala-server.vercel.app/my-services/${user.email}`
+            ),
           ]
         );
 

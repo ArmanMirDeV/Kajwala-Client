@@ -12,14 +12,14 @@ const TopRatedServicesSection = () => {
     const fetchTopRatedServices = async () => {
       try {
         const { data: allServices } = await axios.get(
-          "http://localhost:3000/services"
+          "https://kajwala-server.vercel.app/services"
         );
 
         const servicesWithRating = await Promise.all(
           allServices.map(async (service) => {
             try {
               const { data } = await axios.get(
-                `http://localhost:3000/services/${service._id}/average-rating`
+                `https://kajwala-server.vercel.app/services/${service._id}/average-rating`
               );
               return { ...service, averageRating: data.averageRating || 0 };
             } catch {

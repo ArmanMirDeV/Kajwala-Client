@@ -26,7 +26,7 @@ const MyServices = () => {
     const fetchServices = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/my-services/${user.email}`
+          `https://kajwala-server.vercel.app/my-services/${user.email}`
         );
         setServices(res.data);
       } catch (err) {
@@ -54,7 +54,9 @@ const MyServices = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await axios.delete(`http://localhost:3000/services/${id}`);
+      const res = await axios.delete(
+        `https://kajwala-server.vercel.app/services/${id}`
+      );
       if (res.data.deletedCount > 0) {
         setServices((prev) => prev.filter((s) => s._id !== id));
         Swal.fire("Deleted!", "Service has been deleted.", "success");
@@ -87,7 +89,7 @@ const MyServices = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:3000/services/${editService._id}`,
+        `https://kajwala-server.vercel.app/services/${editService._id}`,
         formData
       );
       setServices((prev) =>
@@ -101,10 +103,7 @@ const MyServices = () => {
     }
   };
 
-  if (loading)
-    return (
-      <Loading />
-    );
+  if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-rose-100 py-10 px-4">

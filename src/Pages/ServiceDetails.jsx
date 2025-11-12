@@ -29,7 +29,9 @@ const ServiceDetails = () => {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/services/${id}`);
+        const res = await axios.get(
+          `https://kajwala-server.vercel.app/services/${id}`
+        );
         setService(res.data);
       } catch (err) {
         console.error(err);
@@ -65,7 +67,10 @@ const ServiceDetails = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/bookings", bookingData);
+      await axios.post(
+        "https://kajwala-server.vercel.app/bookings",
+        bookingData
+      );
       setBookingModalOpen(false);
       setBookingDate("");
       toast.success("Booking successful!");
