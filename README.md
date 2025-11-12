@@ -1,16 +1,29 @@
-# React + Vite
+# Kajwala
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Live Site:** [-------]
 
-Currently, two official plugins are available:
+## Description
+Kajwala is a full-stack service marketplace platform where users can browse, book, and manage various handyman and home services. Service providers can track their bookings, revenue, and ratings. The platform is fully responsive with smooth animations and interactive analytics dashboards.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Key Features
+- **User Authentication:** Secure login and registration using Firebase.  
+- **Profile Management:** Users can update their profile photo, name, and view last login information.  
+- **Service Management:** Providers can add, update, and delete services.  
+- **Booking System:** Users can book services, view booking history, and providers can manage bookings.  
+- **Interactive Charts:** Analytics dashboards using Recharts to visualize service data and revenue distribution.  
+- **RESTful Backend:** Full CRUD API built with Express.js and MongoDB.  
+- **Search & Filter:** Services can be searched and filtered by price range.  
+- **Notifications:** Real-time notifications using React Hot Toast for user actions.  
+- **Responsive Design:** Fully responsive layout using TailwindCSS and DaisyUI components.  
+- **Smooth Animations:** Interactive UI elements powered by Framer Motion.  
+- **Alerts & Modals:** SweetAlert2 integration for confirmations and feedback.  
 
-## React Compiler
+## Tech Stack
+- **Frontend:** React, TailwindCSS, DaisyUI, Framer Motion, Lucide React, React Router  
+- **Backend:** Node.js, Express.js, MongoDB, REST APIs  
+- **Authentication:** Firebase Auth  
+- **Data Fetching:** Axios  
+- **Charts & Analytics:** Recharts  
+- **Notifications:** React Hot Toast  
+- **Build Tools & Dev:** Vite, ESLint  
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
