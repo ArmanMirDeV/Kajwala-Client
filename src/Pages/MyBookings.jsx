@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { AuthContext } from "../Provider/AuthProvider";
+import Loading from "./Loading";
 
 const MyBookings = () => {
   const { user } = useContext(AuthContext);
@@ -13,17 +14,20 @@ const MyBookings = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
+  //  Fetch user bookings
   useEffect(() => {
     if (!user?.email) return;
     const fetchBookings = async () => {
       try {
-        const res = await axios.get(
+        const { data } = await axios.get(
           `http://localhost:3000/bookings/${user.email}`
         );
-        setBookings(res.data);
+        setBookings(data);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to fetch your bookings!");
+        toast.error("Failed to load your bookings.", {
+          style: { background: "#fee2e2", color: "#991b1b" },
+        });
       } finally {
         setLoading(false);
       }
@@ -31,6 +35,7 @@ const MyBookings = () => {
     fetchBookings();
   }, [user]);
 
+  // ✅ Cancel booking
   const handleCancel = async (id) => {
     const result = await Swal.fire({
       title: "Cancel Booking?",
@@ -60,12 +65,16 @@ const MyBookings = () => {
     }
   };
 
+  // ✅ Submit review
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
 
-    if (!reviewModal) return toast.error("No service selected.");
-    if (rating === 0) return toast.error("Please select a rating.");
-    if (!comment.trim()) return toast.error("Please write a comment.");
+    if (!reviewModal)
+      return toast.error("No service selected.", { id: "no-service" });
+    if (rating === 0)
+      return toast.error("Please select a rating.", { id: "no-rating" });
+    if (!comment.trim())
+      return toast.error("Please write a comment.", { id: "no-comment" });
 
     try {
       const reviewData = {
@@ -76,13 +85,15 @@ const MyBookings = () => {
         date: new Date().toISOString(),
       };
 
-      const res = await axios.patch(
+      const { data } = await axios.patch(
         `http://localhost:3000/services/${reviewModal.serviceId}/review`,
         reviewData
       );
 
-      if (res.data.modifiedCount > 0) {
-        toast.success("Review submitted successfully!");
+      if (data.modifiedCount > 0) {
+        toast.success(" Review submitted successfully!", {
+          style: { background: "#dcfce7", color: "#065f46" },
+        });
 
         setBookings((prev) =>
           prev.map((b) =>
@@ -97,20 +108,14 @@ const MyBookings = () => {
         toast.error("Failed to submit review. Try again.");
       }
     } catch (err) {
-      console.error("Review submission error:", err.response || err.message);
+      console.error(err);
       toast.error(
         err.response?.data?.error || "Failed to submit review. Try again."
       );
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
-        Loading your bookings...
-      </div>
-    );
-  }
+  if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-rose-100 py-10 px-2 sm:px-4">
@@ -131,12 +136,12 @@ const MyBookings = () => {
             <table className="w-full border border-gray-200 rounded-lg text-sm sm:text-base">
               <thead className="bg-rose-500 text-white">
                 <tr>
-                  <th className="px-2 sm:px-4 py-2 text-left">Service Name</th>
-                  <th className="px-2 sm:px-4 py-2 text-left">Provider</th>
-                  <th className="px-2 sm:px-4 py-2 text-left">Booking Date</th>
-                  <th className="px-2 sm:px-4 py-2 text-left">Price</th>
-                  <th className="px-2 sm:px-4 py-2 text-left">Status</th>
-                  <th className="px-2 sm:px-4 py-2 text-left">Actions</th>
+                  <th className="px-4 py-2 text-left">Service Name</th>
+                  <th className="px-4 py-2 text-left">Provider</th>
+                  <th className="px-4 py-2 text-left">Booking Date</th>
+                  <th className="px-4 py-2 text-left">Price</th>
+                  <th className="px-4 py-2 text-left">Status</th>
+                  <th className="px-4 py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -145,22 +150,22 @@ const MyBookings = () => {
                     key={booking._id}
                     className="border-b hover:bg-rose-50 transition"
                   >
-                    <td className="px-2 sm:px-4 py-2 font-medium text-gray-700">
+                    <td className="px-4 py-2 font-medium text-gray-700">
                       {booking.serviceName}
                     </td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                    <td className="px-4 py-2 text-gray-600">
                       {booking.providerName}
                     </td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                    <td className="px-4 py-2 text-gray-600">
                       {booking.bookingDate}
                     </td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                    <td className="px-4 py-2 text-gray-600">
                       ${booking.price}
                     </td>
-                    <td className="px-2 sm:px-4 py-2 text-gray-600">
+                    <td className="px-4 py-2 text-gray-600">
                       {booking.status || "Pending"}
                     </td>
-                    <td className="px-2 sm:px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                    <td className="px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
                       <button
                         onClick={() => handleCancel(booking._id)}
                         className="text-red-500 hover:text-red-700 transition"
@@ -192,7 +197,7 @@ const MyBookings = () => {
         )}
       </motion.div>
 
-      {/* Review Modal */}
+      {/*  Review Modal */}
       <AnimatePresence>
         {reviewModal && (
           <motion.div
@@ -202,12 +207,12 @@ const MyBookings = () => {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg w-full max-w-md"
+              className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-md"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
             >
-              <h3 className="text-2xl sm:text-3xl font-bold text-rose-600 mb-2">
+              <h3 className="text-2xl font-bold text-rose-600 mb-2">
                 Review {reviewModal.serviceName}
               </h3>
               <p className="text-gray-500 mb-4">
@@ -215,27 +220,30 @@ const MyBookings = () => {
               </p>
 
               <form onSubmit={handleReviewSubmit} className="space-y-4">
-                <div className="flex gap-2 justify-center text-2xl sm:text-3xl">
+                <div className="flex gap-2 justify-center text-3xl">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span
+                    <motion.span
                       key={star}
+                      whileHover={{ scale: 1.3 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setRating(star)}
                       className={`cursor-pointer transition ${
                         star <= rating
-                          ? "text-yellow-400 scale-110"
+                          ? "text-yellow-400 drop-shadow-md"
                           : "text-gray-300"
                       }`}
                     >
                       ★
-                    </span>
+                    </motion.span>
                   ))}
                 </div>
 
                 <textarea
                   placeholder="Write your review..."
-                  className="w-full border rounded-lg px-3 sm:px-4 py-2 focus:ring-2 focus:ring-rose-400"
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-rose-400"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
+                  rows={3}
                 />
 
                 <div className="flex flex-col sm:flex-row justify-end gap-2">

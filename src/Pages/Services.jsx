@@ -3,6 +3,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
+import Loading from "./Loading";
 
 const Services = () => {
   const [services, setServices] = useState([]);
@@ -61,9 +62,7 @@ const Services = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
-        Loading services...
-      </div>
+      <Loading/>
     );
   }
 

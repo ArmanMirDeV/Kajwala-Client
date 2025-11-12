@@ -13,7 +13,7 @@ const MainLayout = () => {
       {/* Main content */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6">
         <div
-          className="w-full h-[calc(100vh-96px)] bg-gray-50 rounded-lg shadow-inner p-6 overflow-auto"
+          className="w-full h-[calc(100vh-96px)]  rounded-lg shadow-inner p-6 overflow-auto"
           
         >
           <Outlet />

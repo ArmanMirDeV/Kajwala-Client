@@ -49,9 +49,9 @@ const Registration = () => {
     try {
       const result = await createUser(email, password, name, photo);
       setUser(result.user);
-      toast.success("🎉 Account created successfully!");
+      toast.success(" Account created successfully!");
       form.reset();
-      navigate("/"); // ✅ Redirect after success
+      navigate("/"); 
     } catch (error) {
       console.error(error);
       toast.error("Failed to create account. Please try again.");
@@ -63,8 +63,8 @@ const Registration = () => {
     try {
       const result = await signInWithGoogle();
       setUser(result.user);
-      toast.success(`👋 Welcome ${result.user.displayName || "User"}!`);
-      navigate("/"); // ✅ Redirect after success
+      toast.success(` Welcome ${result.user.displayName || "User"}!`);
+      navigate("/"); 
     } catch (error) {
       console.error(error);
       toast.error("Google login failed. Try again.");

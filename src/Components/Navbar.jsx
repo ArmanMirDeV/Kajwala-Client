@@ -140,7 +140,7 @@ const Navbar = () => {
         </motion.div>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-6">
           {menuItems.map((item) => renderMenuLink(item, () => {}))}
 
           {/* Theme Toggle */}
@@ -220,7 +220,7 @@ const Navbar = () => {
         </nav>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
+        <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
@@ -237,7 +237,7 @@ const Navbar = () => {
               theme === "dark"
                 ? "bg-gray-900 text-white"
                 : "bg-white text-gray-700"
-            } md:hidden shadow-inner`}
+            } lg:hidden shadow-inner`}
           >
             <nav className="flex flex-col px-6 py-4 space-y-3">
               {menuItems.map((item) =>

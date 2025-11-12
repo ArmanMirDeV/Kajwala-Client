@@ -42,7 +42,6 @@ const AddServices = () => {
         newService
       );
       if (response.status === 201 || response.status === 200) {
-        toast.success("Service added successfully!");
         setFormData({
           serviceName: "",
           category: "",
@@ -50,6 +49,7 @@ const AddServices = () => {
           description: "",
           imageUrl: "",
         });
+        toast.success("Service added successfully!");
       }
     } catch (error) {
       console.error(error);

@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { AuthContext } from "../Provider/AuthProvider";
+import Loading from "./Loading";
 
 const MyServices = () => {
   const { user } = useContext(AuthContext);
@@ -102,9 +103,7 @@ const MyServices = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center min-h-[60vh] text-gray-600">
-        Loading services...
-      </div>
+      <Loading />
     );
 
   return (

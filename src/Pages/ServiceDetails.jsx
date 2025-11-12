@@ -1,6 +1,6 @@
 // src/Components/ServiceDetails.jsx
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -11,11 +11,20 @@ import { Star, Info } from "lucide-react";
 const ServiceDetails = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [bookingDate, setBookingDate] = useState("");
+
+  useEffect(() => {
+    if (!user) {
+      toast.error("Please log in to view service details");
+      navigate("/login");
+      return;
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -57,9 +66,9 @@ const ServiceDetails = () => {
 
     try {
       await axios.post("http://localhost:3000/bookings", bookingData);
-      toast.success("Booking successful!");
       setBookingModalOpen(false);
       setBookingDate("");
+      toast.success("Booking successful!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to book service.");

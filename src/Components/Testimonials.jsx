@@ -36,7 +36,8 @@ const testimonials = [
     title: "Entrepreneur, Sylhet",
     quote:
       "This platform has made my life much easier. The support and safety measures are top-notch. Highly recommended!",
-    image: "/images/customer4.jpg",
+    image:
+      "https://images.unsplash.com/photo-1762708548538-4a61066f5aa4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687",
   },
 ];
 
