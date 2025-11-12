@@ -94,7 +94,7 @@ const TopRatedServicesSection = () => {
   const renderErrorSkeleton = () => (
     <div className="text-center">
       <p className="text-red-500 mb-6">
-        Couldn’t load top rated services. Reconnect to Client ..
+        Couldn’t load top rated services. Reconnect to server ..
       </p>
       {renderSkeleton()}
     </div>

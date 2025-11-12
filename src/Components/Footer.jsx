@@ -8,7 +8,7 @@ import { BsApple, BsGooglePlay } from "react-icons/bs";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-100 max-w-7xl m-auto rounded-4xl text-gray-800 pt-12 pb-6 relative">
+    <footer className=" max-w-7xl m-auto rounded-4xl text-gray-800 pt-12 pb-6 relative">
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
         {/* CONTACT */}
         <div>
