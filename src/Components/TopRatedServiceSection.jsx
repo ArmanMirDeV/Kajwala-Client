@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 const TopRatedServicesSection = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,10 +17,14 @@ const TopRatedServicesSection = () => {
 
         const servicesWithRating = await Promise.all(
           allServices.map(async (service) => {
-            const { data } = await axios.get(
-              `http://localhost:3000/services/${service._id}/average-rating`
-            );
-            return { ...service, averageRating: data.averageRating || 0 };
+            try {
+              const { data } = await axios.get(
+                `http://localhost:3000/services/${service._id}/average-rating`
+              );
+              return { ...service, averageRating: data.averageRating || 0 };
+            } catch {
+              return { ...service, averageRating: 0 };
+            }
           })
         );
 
@@ -28,8 +33,10 @@ const TopRatedServicesSection = () => {
           .slice(0, 6);
 
         setServices(top6);
+        setError(false);
       } catch (err) {
         console.error("Failed to fetch top rated services:", err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -38,63 +45,72 @@ const TopRatedServicesSection = () => {
     fetchTopRatedServices();
   }, []);
 
+  const renderSkeleton = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-gray-200 rounded-lg h-72 animate-pulse" />
+      ))}
+    </div>
+  );
+
+  const renderServices = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {services.map((service) => (
+        <div
+          key={service._id}
+          className="flex flex-col bg-white rounded-lg shadow-md p-5 transform transition duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer"
+          onClick={() => navigate(`/service-details/${service._id}`)}
+        >
+          <div className="overflow-hidden rounded-md mb-4">
+            <img
+              src={
+                service.imageUrl ||
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHOCzaEM17rj4LhXRx3nOezr76b-3BZ_WN_A&s"
+              }
+              alt={service.serviceName}
+              className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
+            />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">{service.serviceName}</h3>
+          <p className="text-gray-500 text-sm mb-1">{service.category}</p>
+          <p className="text-gray-800 font-medium mb-1">${service.price}</p>
+          <p className="text-yellow-500 font-semibold mb-2">
+            ⭐ {service.averageRating.toFixed(1)}
+          </p>
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+            {service.description}
+          </p>
+          <button
+            type="button"
+            className="mt-auto w-full bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600 transition-colors duration-300 font-medium"
+          >
+            View Details
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderErrorSkeleton = () => (
+    <div className="text-center">
+      <p className="text-red-500 mb-6">
+        Couldn’t load top rated services. Reconnect to Client ..
+      </p>
+      {renderSkeleton()}
+    </div>
+  );
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <h2 className="text-3xl font-bold mb-10 text-center text-rose-600">
         Top Rated Services
       </h2>
 
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-gray-200 rounded-lg h-72 animate-pulse"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {services.map((service) => (
-            
-            <div
-              key={service._id}
-              className="flex flex-col bg-white rounded-lg shadow-md p-5 transform transition duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer"
-              onClick={() => navigate(`/service-details/${service._id}`)}
-            >
-                <div className="overflow-hidden rounded-md mb-4">
-                  
-                  
-                <img
-                  src={
-                    service.imageUrl ||
-                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHOCzaEM17rj4LhXRx3nOezr76b-3BZ_WN_A&s"
-                  }
-                  alt={service.serviceName}
-                  className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
-                />
-              </div>
-              <h3 className="text-lg font-semibold mb-1">
-                {service.serviceName}
-              </h3>
-              <p className="text-gray-500 text-sm mb-1">{service.category}</p>
-              <p className="text-gray-800 font-medium mb-1">${service.price}</p>
-              <p className="text-yellow-500 font-semibold mb-2">
-                ⭐ {service.averageRating.toFixed(1)}
-              </p>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {service.description}
-              </p>
-              <button
-                type="button"
-                className="mt-auto w-full bg-rose-500 text-white px-4 py-2 rounded-lg hover:bg-rose-600 transition-colors duration-300 font-medium"
-              >
-                View Details
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      {loading
+        ? renderSkeleton()
+        : error
+        ? renderErrorSkeleton()
+        : renderServices()}
 
       <div className="mt-10 text-center">
         <button
